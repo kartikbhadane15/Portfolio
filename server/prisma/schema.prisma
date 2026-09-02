@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  role         String   @default("user")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profile         Profile?
+  settings        SiteSettings?
+  projects        Project[]
+  experiences     Experience[]
+  skills          Skill[]
+  educations      Education[]
+  achievements    Achievement[]
+  certifications  Certification[]
+  messages        Message[]
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  tagline     String?
+  bio         String?  @db.Text
+  email       String?
+  photoUrl    String?
+  githubUrl   String?
+  linkedinUrl String?
+  twitterUrl  String?
+  resumeUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Project {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title            String
+  slug             String
+  projectType      String?
+  shortDescription String
+  content          String?  @db.Text
+  imageUrl         String?
+  githubUrl        String?
+  liveUrl          String?
+  isFeatured       Boolean    @default(false)
+  featuredOrder    Int        @default(0)
+  isPublished      Boolean    @default(false)
+  tags             String[]
+  screenshots      String[]
+  websiteUrl       String?
+  startDate        DateTime?
+  endDate          DateTime?
+  caseStudy        CaseStudy?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@unique([userId, slug])
+}
+
+model Experience {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     String
+  role        String
+  location    String?
+  startDate   DateTime
+  endDate     DateTime?
+  isCurrent   Boolean   @default(false)
+  description String?   @db.Text
+  skills      String[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Skill {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  category    String?
+  proficiency Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Education {
+  id           String    @id @default(uuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  institution  String
+  degree       String
+  fieldOfStudy String?
+  startDate    DateTime
+  endDate      DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Achievement {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  date        DateTime
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Certification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  issuer    String
+  date      DateTime
+  url       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CaseStudy {
+  id               String   @id @default(uuid())
+  projectId        String   @unique
+  project          Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  overview         String?  @db.Text
+  problemStatement String?  @db.Text
+  objectives       String?  @db.Text
+  background       String?  @db.Text
+  methodology      String?  @db.Text
+  tools            String?  @db.Text
+  implementation   String?  @db.Text
+  challenges       String?  @db.Text
+  solutions        String?  @db.Text
+  results          String?  @db.Text
+  conclusion       String?  @db.Text
+  futureScope      String?  @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  message   String   @db.Text
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("messages")
+}
+
+model SiteSettings {
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  siteTitle          String   @default("Portfolio") @map("site_title")
+  siteDescription    String?  @default("Professional developer portfolio.") @map("site_description")
+  metaKeywords       String?  @default("Developer, Software Engineer, Portfolio") @map("meta_keywords")
+  defaultTheme       String   @default("dark") @map("default_theme")
+  accentColor        String   @default("#00E5FF") @map("accent_color")
+  isAvailableForHire Boolean  @default(true) @map("is_available_for_hire")
+  availabilityStatus String?  @default("Open to opportunities") @map("availability_status")
+  resumeUrl          String?  @map("resume_url")
+  showExperience     Boolean  @default(true) @map("show_experience")
+  showProjects       Boolean  @default(true) @map("show_projects")
+  showSkills         Boolean  @default(true) @map("show_skills")
+  showCredentials    Boolean  @default(true) @map("show_credentials")
+  showContact        Boolean  @default(true) @map("show_contact")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}

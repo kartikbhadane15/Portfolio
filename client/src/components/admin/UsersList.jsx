@@ -1,0 +1,489 @@
+import { useState, useEffect } from 'react';
+import { fetchAdminUsers, createAdminUser, resetAdminUserPassword, deleteAdminUser } from '../../utils/api';
+
+export default function UsersList() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [modalError, setModalError] = useState('');
+  const [successInfo, setSuccessInfo] = useState(null);
+
+  // Form State
+  const [form, setForm] = useState({
+    name: '',
+    username: '',
+    email: '',
+    password: ''
+  });
+
+  // Password reset modal state
+  const [resetTarget, setResetTarget] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [resetting, setResetting] = useState(false);
+
+  // Delete modal state
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const [copiedLink, setCopiedLink] = useState('');
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchAdminUsers();
+      setUsers(data || []);
+    } catch (err) {
+      console.error('Failed to load users:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    setModalError('');
+    if (!form.name.trim() || !form.username.trim() || !form.email.trim() || !form.password) {
+      setModalError('Please fill in all required fields.');
+      return;
+    }
+    if (form.password.length < 6) {
+      setModalError('Password must be at least 6 characters.');
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const res = await createAdminUser({
+        name: form.name.trim(),
+        username: form.username.trim().toLowerCase(),
+        email: form.email.trim().toLowerCase(),
+        password: form.password
+      });
+
+      setSuccessInfo({
+        username: form.username.trim().toLowerCase(),
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+        url: `${window.location.origin}/${form.username.trim().toLowerCase()}`
+      });
+
+      setForm({ name: '', username: '', email: '', password: '' });
+      loadUsers();
+    } catch (err) {
+      console.error(err);
+      setModalError(err.response?.data?.error || 'Failed to create user.');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!newPassword || newPassword.length < 6) {
+      alert('Password must be at least 6 characters.');
+      return;
+    }
+    setResetting(true);
+    try {
+      await resetAdminUserPassword(resetTarget.id, newPassword);
+      alert(`Password for @${resetTarget.username} updated successfully!`);
+      setResetTarget(null);
+      setNewPassword('');
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to reset password.');
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await deleteAdminUser(deleteTarget.id);
+      setUsers(prev => prev.filter(u => u.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to delete user.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleCopy = (url, key) => {
+    navigator.clipboard.writeText(url);
+    setCopiedLink(key);
+    setTimeout(() => setCopiedLink(''), 2000);
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-6">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20 mb-2">
+            <span>👑</span> Superadmin Control
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+            User Accounts & Portfolios
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Create credentials for people and manage their dynamic portfolio accounts
+          </p>
+        </div>
+
+        <button
+          onClick={() => {
+            setModalOpen(true);
+            setSuccessInfo(null);
+            setModalError('');
+          }}
+          className="self-start sm:self-auto px-5 py-2.5 bg-cyan-accent text-black font-bold rounded-lg hover:bg-cyan-accent/90 transition-colors text-sm flex items-center gap-2 shadow-xs cursor-pointer"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Create New User
+        </button>
+      </div>
+
+      {/* USERS TABLE */}
+      {loading ? (
+        <div className="py-20 flex flex-col items-center justify-center gap-3">
+          <div className="w-8 h-8 border-2 border-cyan-accent border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-gray-500">Loading user accounts...</span>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
+          <table className="w-full text-left text-sm text-gray-600 dark:text-gray-400">
+            <thead className="bg-gray-50 dark:bg-[#161616] text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-800 text-xs uppercase font-semibold">
+              <tr>
+                <th className="px-6 py-4">User</th>
+                <th className="px-6 py-4">Username & Public Link</th>
+                <th className="px-6 py-4">Role</th>
+                <th className="px-6 py-4">Projects</th>
+                <th className="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-800/60">
+              {users.map((u) => {
+                const portfolioUrl = `${window.location.origin}/${u.username}`;
+                return (
+                  <tr key={u.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-gray-900 dark:text-white">
+                        {u.profile?.name || u.email}
+                      </div>
+                      <div className="text-xs text-gray-500">{u.email}</div>
+                    </td>
+
+                    <td className="px-6 py-4">
+                      <div className="font-mono text-xs font-bold text-cyan-accent">
+                        @{u.username}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <a
+                          href={portfolioUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-gray-500 hover:text-cyan-accent hover:underline flex items-center gap-1"
+                        >
+                          <span>Open link</span> &rarr;
+                        </a>
+                        <button
+                          onClick={() => handleCopy(portfolioUrl, u.id)}
+                          className="text-[11px] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-white"
+                        >
+                          {copiedLink === u.id ? '✓ Copied' : 'Copy'}
+                        </button>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                        u.role === 'superadmin'
+                          ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                          : 'bg-cyan-accent/10 text-cyan-accent border border-cyan-accent/20'
+                      }`}>
+                        {u.role}
+                      </span>
+                    </td>
+
+                    <td className="px-6 py-4 text-xs">
+                      <span className="font-bold text-gray-900 dark:text-white">{u._count?.projects || 0}</span> projects
+                    </td>
+
+                    <td className="px-6 py-4 text-right space-x-3">
+                      <button
+                        onClick={() => {
+                          setResetTarget(u);
+                          setNewPassword('');
+                        }}
+                        className="text-xs font-semibold text-gray-500 hover:text-cyan-accent cursor-pointer"
+                      >
+                        Reset Password
+                      </button>
+
+                      {u.role !== 'superadmin' && (
+                        <button
+                          onClick={() => setDeleteTarget(u)}
+                          className="text-xs font-semibold text-red-500 hover:underline cursor-pointer"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* CREATE NEW USER MODAL */}
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={(e) => { if (e.target === e.currentTarget && !creating) setModalOpen(false); }}
+        >
+          <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150">
+            
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                Create User & Portfolio Credentials
+              </h3>
+              <button
+                onClick={() => setModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-white"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Error Banner */}
+            {modalError && (
+              <div className="mx-6 mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs">
+                {modalError}
+              </div>
+            )}
+
+            {/* SUCCESS BANNER */}
+            {successInfo ? (
+              <div className="p-6 space-y-5">
+                <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-400 space-y-2">
+                  <div className="font-bold flex items-center gap-1.5">
+                    <span>✓</span> Account Created Successfully!
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-300">
+                    Share these credentials with the user so they can log in and customize their portfolio:
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 space-y-2.5 font-mono text-xs">
+                  <div>
+                    <span className="text-gray-500">Public Link: </span>
+                    <a href={successInfo.url} target="_blank" rel="noreferrer" className="text-cyan-accent font-bold hover:underline">
+                      {successInfo.url}
+                    </a>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Login Email: </span>
+                    <span className="text-gray-900 dark:text-white font-bold">{successInfo.email}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Password: </span>
+                    <span className="text-gray-900 dark:text-white font-bold">{successInfo.password}</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => {
+                      setSuccessInfo(null);
+                      setModalOpen(false);
+                    }}
+                    className="px-5 py-2 bg-cyan-accent text-black font-bold rounded-lg text-xs hover:bg-cyan-accent/90"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleCreateUser} className="p-6 space-y-4">
+                
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Alex Robinson"
+                    value={form.name}
+                    onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">
+                    Username / Slug <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex items-center">
+                    <span className="bg-gray-100 dark:bg-gray-800 px-3 py-2 border border-r-0 border-gray-200 dark:border-gray-800 rounded-l-lg text-xs font-mono text-gray-500">
+                      /
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      placeholder="alex"
+                      value={form.username}
+                      onChange={e => setForm(p => ({ ...p, username: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '') }))}
+                      className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-r-lg px-3 py-2 text-sm text-gray-900 dark:text-white font-mono outline-none focus:border-cyan-accent"
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    Their live portfolio will be at: <span className="text-cyan-accent font-mono">{window.location.origin}/{form.username || 'username'}</span>
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">
+                    Login Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="alex@example.com"
+                    value={form.email}
+                    onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">
+                    Password <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Minimum 6 characters"
+                    value={form.password}
+                    onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
+                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white font-mono outline-none focus:border-cyan-accent"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(false)}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={creating}
+                    className="px-5 py-2 bg-cyan-accent text-black font-bold rounded-lg text-xs hover:bg-cyan-accent/90 disabled:opacity-50"
+                  >
+                    {creating ? 'Creating...' : 'Create User'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+          </div>
+        </div>
+      )}
+
+      {/* RESET PASSWORD MODAL */}
+      {resetTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={() => setResetTarget(null)}
+        >
+          <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              Reset Password for @{resetTarget.username}
+            </h3>
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">New Password</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Enter new password"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm font-mono text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setResetTarget(null)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={resetting}
+                  className="px-5 py-2 bg-cyan-accent text-black font-bold rounded-lg text-xs hover:bg-cyan-accent/90"
+                >
+                  {resetting ? 'Saving...' : 'Update Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={() => setDeleteTarget(null)}
+        >
+          <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Delete User Account</h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to delete <span className="font-semibold text-gray-800 dark:text-gray-200">@{deleteTarget.username}</span>? This will permanently delete their profile, projects, and all portfolio data.
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                disabled={deleting}
+                onClick={() => setDeleteTarget(null)}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-xs font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={deleting}
+                onClick={handleDeleteUser}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs"
+              >
+                {deleting ? 'Deleting...' : 'Delete User'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}

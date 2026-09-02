@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --accent-color: #00E5FF;
+}
+
+@theme {
+  --color-cyan-accent: var(--accent-color, #00E5FF);
+  --color-purple-accent: #B388FF;
+  --color-dark-bg: #000000;
+  --color-dark-card: #111111;
+  --color-light-bg: #F9FAFB;
+  --color-light-card: #FFFFFF;
+}
+
+@layer base {
+  body {
+    @apply bg-light-bg text-gray-900 antialiased transition-colors duration-300;
+    font-family: 'Inter', -apple-system, sans-serif;
+  }
+  
+  .dark body {
+    @apply bg-dark-bg text-white;
+  }
+}
