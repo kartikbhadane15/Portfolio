@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Since the client and server are running on different ports during dev
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // Hardcoding for dev, we can extract to env later
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
 });
 
 export const fetchProfile = () => api.get('/profile').then(res => res.data);

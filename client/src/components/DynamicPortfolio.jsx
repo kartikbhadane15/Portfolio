@@ -13,7 +13,7 @@ import CredentialsSection from './sections/CredentialsSection';
 import Contact from './sections/Contact';
 import RecruiterModal from './RecruiterModal';
 
-export default function DynamicPortfolio({ defaultUsername = 'kartik' }) {
+export default function DynamicPortfolio({ defaultUsername = null }) {
   const { username: routeUsername } = useParams();
   const username = routeUsername || defaultUsername;
 
@@ -23,6 +23,12 @@ export default function DynamicPortfolio({ defaultUsername = 'kartik' }) {
   const [isRecruiterModalOpen, setIsRecruiterModalOpen] = useState(false);
 
   useEffect(() => {
+    if (!username) {
+      setLoading(false);
+      setNotFound(true);
+      return;
+    }
+
     setLoading(true);
     setNotFound(false);
 
@@ -84,10 +90,10 @@ export default function DynamicPortfolio({ defaultUsername = 'kartik' }) {
           The portfolio for user <span className="font-mono text-cyan-accent font-bold">@{username}</span> does not exist or has not been configured yet.
         </p>
         <Link
-          to="/kartik"
-          className="px-6 py-2.5 bg-cyan-accent text-black font-bold text-sm rounded-xl hover:bg-cyan-accent/90 transition-colors"
+          to="/"
+          className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 font-semibold text-xs sm:text-sm rounded-xl transition-colors shadow-xs"
         >
-          &larr; Return to Kartik's Portfolio
+          &larr; Return to Home Portfolio
         </Link>
       </div>
     );
@@ -174,6 +180,8 @@ export default function DynamicPortfolio({ defaultUsername = 'kartik' }) {
         isOpen={isRecruiterModalOpen}
         onClose={() => setIsRecruiterModalOpen(false)}
         settings={settings}
+        portfolioData={portfolioData}
+        username={username}
       />
     </div>
   );

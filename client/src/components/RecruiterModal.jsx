@@ -15,41 +15,49 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
-export default function RecruiterModal({ isOpen, onClose, settings }) {
-  const [profile, setProfile] = useState(null);
-  const [projects, setProjects] = useState([]);
-  const [experience, setExperience] = useState([]);
-  const [skills, setSkills] = useState({});
-  const [education, setEducation] = useState([]);
-  const [certifications, setCertifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function RecruiterModal({ isOpen, onClose, settings, portfolioData, username }) {
+  const [profile, setProfile] = useState(portfolioData?.profile || null);
+  const [projects, setProjects] = useState(portfolioData?.projects || []);
+  const [experience, setExperience] = useState(portfolioData?.experience || []);
+  const [skills, setSkills] = useState(portfolioData?.skills || {});
+  const [education, setEducation] = useState(portfolioData?.education || []);
+  const [certifications, setCertifications] = useState(portfolioData?.certifications || []);
+  const [loading, setLoading] = useState(!portfolioData);
   const [copiedEmail, setCopiedEmail] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
 
+    if (portfolioData) {
+      setProfile(portfolioData.profile || null);
+      setProjects(portfolioData.projects ? portfolioData.projects.filter(p => p.isFeatured !== false) : []);
+      setExperience(portfolioData.experience || []);
+      setSkills(portfolioData.skills || {});
+      setEducation(portfolioData.education || []);
+      setCertifications(portfolioData.certifications || []);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
-    // Load data concurrently with resilient fallbacks
-    Promise.all([
-      fetchProfile().catch(() => null),
-      fetchProjects(true).catch(() => []),
-      fetchExperience().catch(() => []),
-      fetchSkills().catch(() => ({})),
-      fetchEducation().catch(() => []),
-      fetchCertifications().catch(() => []),
-    ]).then(([prof, projs, exp, sk, edu, certs]) => {
-      setProfile(prof || null);
-      setProjects(Array.isArray(projs) ? projs : []);
-      setExperience(Array.isArray(exp) ? exp : []);
-      setSkills(sk || {});
-      setEducation(Array.isArray(edu) ? edu : []);
-      setCertifications(Array.isArray(certs) ? certs : []);
-    }).catch((err) => {
-      console.error('Recruiter modal data loading error:', err);
-    }).finally(() => {
-      setLoading(false);
-    });
+    fetchPublicPortfolio(username || 'kartik')
+      .then((data) => {
+        if (data) {
+          setProfile(data.profile || null);
+          setProjects(data.projects ? data.projects.filter(p => p.isFeatured !== false) : []);
+          setExperience(data.experience || []);
+          setSkills(data.skills || {});
+          setEducation(data.education || []);
+          setCertifications(data.certifications || []);
+        }
+      })
+      .catch((err) => {
+        console.error('Recruiter modal data loading error:', err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
 
     // Close on Escape key
     const handleKeyDown = (e) => {
@@ -57,21 +65,21 @@ export default function RecruiterModal({ isOpen, onClose, settings }) {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, portfolioData, username]);
 
   if (!isOpen) return null;
 
-  const email = profile?.email || 'kartikbhadane004@gmail.com';
+  const email = profile?.email || '';
   const resumeHref = settings?.resumeUrl || profile?.resumeUrl || '/resume.pdf';
-  const linkedinHref = profile?.linkedinUrl || 'https://www.linkedin.com/in/kartik-bhadane-b0464229b/';
-  const githubHref = profile?.githubUrl || 'https://github.com/kartikbhadane15';
+  const linkedinHref = profile?.linkedinUrl || '';
+  const githubHref = profile?.githubUrl || '';
 
   const handleCopyEmail = () => {
-    if (navigator?.clipboard) {
+    if (email && navigator?.clipboard) {
       navigator.clipboard.writeText(email);
+      setCopiedEmail(true);
+      setTimeout(() => setCopiedEmail(false), 2500);
     }
-    setCopiedEmail(true);
-    setTimeout(() => setCopiedEmail(false), 2500);
   };
 
   // Safe category extraction whether skills is an array or a grouped object
@@ -201,7 +209,7 @@ export default function RecruiterModal({ isOpen, onClose, settings }) {
                     href={githubHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 px-3 py-2 bg-white dark:bg-[#151515] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold rounded-xl flex items-center justify-center gap-1 hover:border-purple-500 hover:text-purple-500 transition-colors"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-[#151515] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold rounded-xl flex items-center justify-center gap-1 hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
                   >
                     <span>GitHub</span>
                   </a>

@@ -104,7 +104,7 @@ export default function Contact({ settings, profileData, username }) {
           
           <div className="space-y-6 pt-4">
             {/* Email */}
-            {email ? (
+            {email && (
               <a
                 href={`mailto:${email}`}
                 target="_blank"
@@ -117,20 +117,6 @@ export default function Contact({ settings, profileData, username }) {
                   </svg>
                 </div>
                 <span className="break-all">{email}</span>
-              </a>
-            ) : (
-              <a
-                href="mailto:kartikbhadane15@gmail.com"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-4 text-gray-600 dark:text-gray-300 hover:text-cyan-accent dark:hover:text-cyan-accent transition-colors group"
-              >
-                <div className="w-12 h-12 rounded-full border border-gray-300 dark:border-gray-800 bg-gray-50 dark:bg-dark-card flex items-center justify-center group-hover:border-cyan-accent group-hover:bg-cyan-accent/10 transition-colors flex-shrink-0">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                  </svg>
-                </div>
-                <span>kartikbhadane15@gmail.com</span>
               </a>
             )}
 

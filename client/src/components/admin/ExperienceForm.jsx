@@ -11,12 +11,14 @@ export default function ExperienceForm() {
     role: '',
     company: '',
     location: '',
-    description: '',
     startDate: '',
     endDate: '',
-    skills: '',
+    description: '',
+    skills: ''
   });
+
   const [loading, setLoading] = useState(isEditing);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
@@ -27,21 +29,20 @@ export default function ExperienceForm() {
   const loadExperience = async () => {
     try {
       const allExp = await fetchAdminExperience();
-      const exp = allExp.find(e => e.id === id);
-      if (exp) {
+      const current = allExp.find(e => e.id === id);
+      if (current) {
         setFormData({
-          role: exp.role || '',
-          company: exp.company || '',
-          location: exp.location || '',
-          description: exp.description || '',
-          // Format for input type="date"
-          startDate: exp.startDate ? new Date(exp.startDate).toISOString().split('T')[0] : '',
-          endDate: exp.endDate ? new Date(exp.endDate).toISOString().split('T')[0] : '',
-          skills: exp.skills ? exp.skills.join(', ') : '',
+          role: current.role || '',
+          company: current.company || '',
+          location: current.location || '',
+          startDate: current.startDate ? current.startDate.split('T')[0] : '',
+          endDate: current.endDate ? current.endDate.split('T')[0] : '',
+          description: current.description || '',
+          skills: current.skills ? current.skills.join(', ') : ''
         });
       }
     } catch (error) {
-      console.error('Failed to load experience', error);
+      console.error('Failed to load experience details', error);
     } finally {
       setLoading(false);
     }
@@ -49,152 +50,188 @@ export default function ExperienceForm() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Prepare data
-    const submitData = {
-      ...formData,
-      startDate: new Date(formData.startDate).toISOString(),
-      endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
-      skills: formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : []
-    };
+    setSaving(true);
 
     try {
+      const payload = {
+        ...formData,
+        startDate: new Date(formData.startDate).toISOString(),
+        endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
+        skills: formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : []
+      };
+
       if (isEditing) {
-        await updateAdminExperience(id, submitData);
+        await updateAdminExperience(id, payload);
       } else {
-        await createAdminExperience(submitData);
+        await createAdminExperience(payload);
       }
+
       navigate('/admin/experience');
     } catch (error) {
       console.error('Failed to save experience', error);
-      alert('Failed to save experience');
+      alert('Failed to save experience. Check console for details.');
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (loading) return <div className="text-gray-400">Loading experience data...</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[300px]">
+        <div className="w-8 h-8 border-2 border-slate-900 dark:border-white border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex items-center gap-4 mb-6">
-        <button onClick={() => navigate('/admin/experience')} className="text-gray-400 hover:text-white">
-          &larr; Back
+    <div className="max-w-3xl mx-auto space-y-6">
+      <div className="flex items-center gap-4">
+        <button 
+          onClick={() => navigate('/admin/experience')} 
+          className="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1 transition-colors"
+        >
+          <span>&larr;</span> Back to Experience
         </button>
-        <h2 className="text-2xl font-bold text-white">
-          {isEditing ? 'Edit Experience' : 'Add Experience'}
-        </h2>
       </div>
 
-      <div className="bg-[#111111] border border-gray-800 rounded-xl p-6 sm:p-8">
+      <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xs">
+        <div className="mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
+            {isEditing ? 'Edit Experience Entry' : 'Add Experience Entry'}
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Detail your position, organization, accomplishments, and tech stack
+          </p>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-white">Role / Job Title *</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Role / Job Title *
+              </label>
               <input 
                 type="text" 
                 name="role"
                 required
                 value={formData.role}
                 onChange={handleChange}
-                className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
+                placeholder="e.g. Senior Software Engineer"
+                className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-white">Company *</label>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Company / Organization *
+              </label>
               <input 
                 type="text" 
                 name="company"
                 required
                 value={formData.company}
                 onChange={handleChange}
-                className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
+                placeholder="e.g. Acme Corp or Open Source"
+                className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-white">Location</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Location
+              </label>
               <input 
                 type="text" 
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
-                placeholder="e.g. Remote, New York, NY"
-                className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
+                placeholder="e.g. Remote • San Francisco, CA"
+                className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-white">Skills</label>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Skills / Technologies
+              </label>
               <input 
                 type="text" 
                 name="skills"
                 value={formData.skills}
                 onChange={handleChange}
-                placeholder="e.g. React, Node.js, AWS (comma separated)"
-                className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
+                placeholder="React, TypeScript, Node.js, Postgres"
+                className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-white">Start Date *</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Start Date *
+              </label>
               <input 
                 type="date" 
                 name="startDate"
                 required
                 value={formData.startDate}
                 onChange={handleChange}
-                className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
+                className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-white">End Date</label>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                End Date
+              </label>
               <input 
                 type="date" 
                 name="endDate"
                 value={formData.endDate}
                 onChange={handleChange}
-                className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
+                className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
-              <p className="text-xs text-gray-500">Leave blank if this is your current role.</p>
+              <p className="text-[11px] text-slate-400">Leave blank if this is your current active role.</p>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-white">Description *</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              Description &amp; Highlights *
+            </label>
             <textarea 
               name="description"
               required
-              rows="4"
+              rows="5"
               value={formData.description}
               onChange={handleChange}
-              className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none resize-none"
+              placeholder="Describe your technical contributions, architecture decisions, and metrics..."
+              className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none resize-none transition-colors leading-relaxed"
             />
           </div>
 
-          <div className="pt-6 border-t border-gray-800 flex justify-end gap-4">
+          <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
             <button 
               type="button" 
               onClick={() => navigate('/admin/experience')}
-              className="px-6 py-2 text-gray-400 hover:text-white font-medium"
+              className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button 
               type="submit" 
-              className="px-6 py-2 bg-purple-500 text-white font-bold rounded-lg hover:bg-purple-600"
+              disabled={saving}
+              className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-xs disabled:opacity-50 cursor-pointer"
             >
-              {isEditing ? 'Save Changes' : 'Add Experience'}
+              {saving ? 'Saving...' : (isEditing ? 'Save Changes' : 'Create Experience')}
             </button>
           </div>
 

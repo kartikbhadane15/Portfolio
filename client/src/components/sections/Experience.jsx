@@ -83,7 +83,7 @@ export default function Experience({ showAll = false, experienceData, username }
                           <ul className="space-y-3 mt-4 pl-1">
                             {bullets.map((bullet, i) => (
                               <li key={i} className="flex items-start">
-                                <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-purple-500 mt-2.5 mr-4"></span>
+                                <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-cyan-accent mt-2.5 mr-4"></span>
                                 <span>{bullet}</span>
                               </li>
                             ))}

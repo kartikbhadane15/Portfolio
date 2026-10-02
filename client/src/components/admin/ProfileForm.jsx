@@ -77,28 +77,28 @@ export default function ProfileForm() {
     }
   };
 
-  if (loading) return <div className="text-gray-500">Loading...</div>;
+  if (loading) return <div className="text-slate-500 text-sm py-8">Loading profile...</div>;
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex items-center justify-between mb-8">
+    <div className="max-w-4xl space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors">Profile Settings</h2>
-          <p className="text-gray-500 dark:text-gray-400 mt-1 transition-colors">Manage your personal information and photo.</p>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Profile Settings</h2>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your personal information, contact links, and avatar.</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm transition-colors space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xs transition-colors space-y-6">
         
         {/* Photo Upload Section */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors">Profile Photo</label>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2 transition-colors">Profile Photo</label>
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 bg-gray-100 dark:bg-black rounded-full border border-gray-200 dark:border-gray-800 flex items-center justify-center overflow-hidden transition-colors">
+            <div className="w-20 h-20 bg-slate-100 dark:bg-[#090D16] rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden transition-colors shadow-2xs">
               {formData.photoUrl ? (
                 <img src={formData.photoUrl} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
               )}
             </div>
             <div className="flex-1 space-y-3">
@@ -107,120 +107,119 @@ export default function ProfileForm() {
                 accept="image/png, image/jpeg"
                 onChange={handleFileChange}
                 disabled={uploading}
-                className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-accent/10 file:text-cyan-accent hover:file:bg-cyan-accent/20 transition-colors"
+                className="block w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border file:border-slate-200 dark:file:border-slate-700 file:text-xs file:font-semibold file:bg-white dark:file:bg-slate-800 file:text-slate-700 dark:file:text-slate-200 hover:file:bg-slate-50 dark:hover:file:bg-slate-700/80 transition-colors cursor-pointer"
               />
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400">OR paste link:</span>
+                <span className="text-xs text-slate-400">OR paste link:</span>
                 <input
                   type="url"
                   name="photoUrl"
                   value={formData.photoUrl}
                   onChange={handleChange}
                   placeholder="https://example.com/photo.jpg"
-                  className="flex-1 bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-1.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-cyan-accent transition-colors"
+                  className="flex-1 bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors placeholder:text-slate-400"
                 />
               </div>
             </div>
           </div>
-          {uploading && <p className="text-sm text-cyan-accent mt-2">Uploading...</p>}
+          {uploading && <p className="text-xs font-medium text-sky-600 dark:text-sky-400 mt-2">Uploading image...</p>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors">Name</label>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 transition-colors">Name</label>
             <input
               type="text"
               name="name"
               required
               value={formData.name}
               onChange={handleChange}
-              className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-cyan-accent transition-colors"
+              className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors placeholder:text-slate-400"
             />
           </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors">Tagline</label>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 transition-colors">Tagline</label>
             <input
               type="text"
               name="tagline"
               value={formData.tagline}
               onChange={handleChange}
               placeholder="e.g. Full Stack Developer"
-              className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-cyan-accent transition-colors"
+              className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors placeholder:text-slate-400"
             />
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors">Bio</label>
+        <div className="space-y-1.5">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 transition-colors">Bio</label>
           <textarea
             name="bio"
             rows={4}
             value={formData.bio}
             onChange={handleChange}
-            className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-cyan-accent transition-colors"
+            className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors placeholder:text-slate-400"
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors">Contact Email</label>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 transition-colors">Contact Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="e.g. you@gmail.com"
-              className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-cyan-accent transition-colors"
+              className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors placeholder:text-slate-400"
             />
           </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors">GitHub URL</label>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 transition-colors">GitHub URL</label>
             <input
               type="url"
               name="githubUrl"
               value={formData.githubUrl}
               onChange={handleChange}
-              className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-cyan-accent transition-colors"
+              className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors placeholder:text-slate-400"
             />
           </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors">LinkedIn URL</label>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 transition-colors">LinkedIn URL</label>
             <input
               type="url"
               name="linkedinUrl"
               value={formData.linkedinUrl}
               onChange={handleChange}
-              className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-cyan-accent transition-colors"
+              className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors placeholder:text-slate-400"
             />
           </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors">Twitter URL</label>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 transition-colors">Twitter URL</label>
             <input
               type="url"
               name="twitterUrl"
               value={formData.twitterUrl}
               onChange={handleChange}
-              className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-cyan-accent transition-colors"
+              className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors placeholder:text-slate-400"
             />
           </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors">Resume URL</label>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 transition-colors">Resume URL</label>
             <input
               type="url"
               name="resumeUrl"
               value={formData.resumeUrl}
               onChange={handleChange}
-              className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-cyan-accent transition-colors"
+              className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors placeholder:text-slate-400"
             />
           </div>
         </div>
 
-
-        <div className="flex justify-end gap-4 pt-4">
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
           <button
             type="submit"
             disabled={saving || uploading}
-            className="px-6 py-2.5 bg-cyan-accent text-black font-semibold rounded-lg hover:bg-cyan-accent/90 disabled:opacity-50 transition-colors"
+            className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold text-xs sm:text-sm rounded-xl shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
           >
             {saving ? 'Saving...' : 'Save Profile'}
           </button>

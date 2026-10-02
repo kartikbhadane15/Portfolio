@@ -183,95 +183,118 @@ export default function ProjectForm() {
   if (loading) return <div className="text-gray-400">Loading project data...</div>;
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex items-center gap-4 mb-6">
-        <button onClick={() => navigate('/admin/projects')} className="text-gray-400 hover:text-white">
-          &larr; Back
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="flex items-center gap-4">
+        <button 
+          onClick={() => navigate('/admin/projects')} 
+          className="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1 transition-colors"
+        >
+          <span>&larr;</span> Back to Projects
         </button>
-        <h2 className="text-2xl font-bold text-white">
-          {isEditing ? 'Edit Project' : 'Add New Project'}
-        </h2>
       </div>
 
-      <div className="bg-[#111111] border border-gray-800 rounded-xl p-6 sm:p-8">
+      <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xs">
+        <div className="mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
+            {isEditing ? 'Edit Project' : 'Create New Project'}
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Configure your showcase details, media, links, and in-depth engineering case study
+          </p>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-white">Project Title *</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Project Title *
+              </label>
               <input 
                 type="text" 
                 name="title"
                 required
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent outline-none"
+                placeholder="e.g. Distributed Task Queue"
+                className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-white">Project Type</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Project Type
+              </label>
               <input 
                 type="text" 
                 name="projectType"
-                placeholder="e.g. Web App, Library, Full Stack"
+                placeholder="e.g. Full-Stack App, Mobile, Library"
                 value={formData.projectType}
                 onChange={handleChange}
-                className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent outline-none"
+                className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-white">Start Date</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Start Date
+              </label>
               <input 
                 type="date" 
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleChange}
-                className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent outline-none"
+                className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-bold text-white">End Date</label>
-                <span className="text-xs text-gray-400">Leave empty if Ongoing</span>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  End Date
+                </label>
+                <span className="text-[11px] text-slate-400">Leave blank if Ongoing</span>
               </div>
               <input 
                 type="date" 
                 name="endDate"
                 value={formData.endDate}
                 onChange={handleChange}
-                className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent outline-none"
+                className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-white">Description *</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              Short Description / Summary *
+            </label>
             <textarea 
               name="description"
               required
-              rows="4"
+              rows="3"
               value={formData.description}
               onChange={handleChange}
-              className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent outline-none resize-none"
+              placeholder="Brief summary of the architecture, key problem solved, and stack..."
+              className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none resize-none transition-colors"
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-white">Main Image URL</label>
-            <div className="flex gap-2">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              Main Thumbnail Image URL
+            </label>
+            <div className="flex flex-col sm:flex-row gap-2">
               <input 
                 type="url" 
                 name="imageUrl"
-                placeholder="https://example.com/image.jpg"
+                placeholder="https://example.com/cover.jpg"
                 value={formData.imageUrl}
                 onChange={handleChange}
-                className="flex-1 bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent outline-none"
+                className="flex-1 bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
-              <label className="cursor-pointer bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center">
-                Upload
+              <label className="cursor-pointer bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-800 dark:text-slate-200 px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center text-xs font-semibold border border-slate-200 dark:border-slate-700 shadow-2xs">
+                Upload Image
                 <input 
                   type="file" 
                   className="hidden" 
@@ -283,24 +306,36 @@ export default function ProjectForm() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-white">Sub Photos (Screenshots)</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              Sub Photos / Screenshots
+            </label>
             {formData.screenshots.map((shot, idx) => (
-              <div key={idx} className="flex gap-2 mb-2">
+              <div key={idx} className="flex gap-2">
                 <input
                   type="url"
                   value={shot}
                   onChange={(e) => handleScreenshotChange(idx, e.target.value)}
                   placeholder="https://example.com/screenshot.jpg"
-                  className="flex-1 bg-black border border-gray-800 rounded-lg px-4 py-2 text-white outline-none focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent"
+                  className="flex-1 bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                 />
-                <button type="button" onClick={() => removeScreenshot(idx)} className="bg-red-900/30 hover:bg-red-900 text-red-500 px-3 rounded-lg transition-colors">X</button>
+                <button 
+                  type="button" 
+                  onClick={() => removeScreenshot(idx)} 
+                  className="bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 px-3 rounded-xl text-xs font-semibold transition-colors"
+                >
+                  ✕
+                </button>
               </div>
             ))}
-            <div className="flex gap-6 mt-2">
-              <button type="button" onClick={addScreenshotField} className="text-sm text-cyan-accent hover:underline font-medium">
-                + Add URL manually
+            <div className="flex gap-4 pt-1">
+              <button 
+                type="button" 
+                onClick={addScreenshotField} 
+                className="text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline"
+              >
+                + Add Screenshot URL
               </button>
-              <label className="text-sm text-cyan-accent hover:underline font-medium cursor-pointer">
+              <label className="text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer">
                 + Upload Photo
                 <input 
                   type="file" 
@@ -312,125 +347,142 @@ export default function ProjectForm() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-white">Demo URL</label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Demo URL
+              </label>
               <input 
                 type="url" 
                 name="demoUrl"
+                placeholder="https://app.example.com"
                 value={formData.demoUrl}
                 onChange={handleChange}
-                className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent outline-none"
+                className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-white">GitHub URL</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                GitHub Repo
+              </label>
               <input 
                 type="url" 
                 name="githubUrl"
+                placeholder="https://github.com/..."
                 value={formData.githubUrl}
                 onChange={handleChange}
-                className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent outline-none"
+                className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-white">Website URL</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Website / Article
+              </label>
               <input 
                 type="url" 
                 name="websiteUrl"
+                placeholder="https://..."
                 value={formData.websiteUrl}
                 onChange={handleChange}
-                className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent outline-none"
+                className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-white">Tags (comma separated)</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              Tags / Technologies (comma separated)
+            </label>
             <input 
               type="text" 
               name="tags"
-              placeholder="React, Node.js, Tailwind"
+              placeholder="React, Node.js, Postgres, Docker"
               value={formData.tags}
               onChange={handleChange}
-              className="w-full bg-black border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent outline-none"
+              className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
             />
           </div>
 
-          <div className="flex items-center gap-6 pt-4">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-6 pt-2">
+            <label className="flex items-center gap-3 cursor-pointer">
               <input 
                 type="checkbox" 
                 name="isFeatured"
                 id="isFeatured"
                 checked={formData.isFeatured}
                 onChange={handleChange}
-                className="w-5 h-5 rounded bg-black border-gray-800 text-cyan-accent focus:ring-cyan-accent"
+                className="w-4 h-4 rounded text-slate-900 dark:text-sky-500 accent-slate-900 dark:accent-sky-500"
               />
-              <label htmlFor="isFeatured" className="text-sm text-gray-300 font-medium">
-                Feature this project on the home page
-              </label>
-            </div>
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Feature on home page
+              </span>
+            </label>
             
             {formData.isFeatured && (
-              <div className="flex items-center gap-3">
-                <label className="text-sm font-bold text-white">Priority Order:</label>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-500">Order:</span>
                 <input 
                   type="number" 
                   name="featuredOrder"
                   value={formData.featuredOrder}
                   onChange={handleChange}
-                  placeholder="e.g. 1"
-                  className="w-20 bg-black border border-gray-800 rounded-lg px-3 py-1 text-white focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent outline-none"
+                  placeholder="1"
+                  className="w-20 bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 outline-none"
                 />
               </div>
             )}
           </div>
 
-          <div className="pt-6 border-t border-gray-800">
+          <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">Project Case Study</h3>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                  Detailed Case Study
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Optional engineering breakdown for recruiters and visitors</p>
+              </div>
+
               <label className="flex items-center cursor-pointer">
-                <div className="relative">
-                  <input 
-                    type="checkbox" 
-                    name="showCaseStudy"
-                    className="sr-only"
-                    checked={formData.showCaseStudy}
-                    onChange={handleChange}
-                  />
-                  <div className={`block w-14 h-8 rounded-full ${formData.showCaseStudy ? 'bg-cyan-accent' : 'bg-gray-700'}`}></div>
-                  <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition transform ${formData.showCaseStudy ? 'translate-x-6' : ''}`}></div>
+                <input 
+                  type="checkbox" 
+                  name="showCaseStudy"
+                  className="sr-only"
+                  checked={formData.showCaseStudy}
+                  onChange={handleChange}
+                />
+                <div className={`w-11 h-6 rounded-full transition-colors ${formData.showCaseStudy ? 'bg-slate-900 dark:bg-sky-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                  <div className={`w-5 h-5 bg-white rounded-full transition-transform mt-0.5 ml-0.5 ${formData.showCaseStudy ? 'translate-x-5' : ''}`} />
                 </div>
-                <div className="ml-3 text-gray-300 font-medium">Include Detailed Case Study</div>
               </label>
             </div>
             
             {formData.showCaseStudy && (
-              <div className="space-y-6 mt-6 bg-black p-6 rounded-xl border border-gray-800">
+              <div className="space-y-5 mt-4 p-5 sm:p-6 rounded-2xl bg-slate-50/80 dark:bg-[#090D16]/80 border border-slate-200 dark:border-slate-800">
                 {[
                   { id: 'cs_overview', label: 'Project Overview', placeholder: 'What the project is about.' },
                   { id: 'cs_problemStatement', label: 'Problem Statement', placeholder: 'The problem or need you wanted to solve.' },
                   { id: 'cs_objectives', label: 'Objectives', placeholder: 'What the project aimed to achieve.' },
-                  { id: 'cs_background', label: 'Background/Context', placeholder: 'Why the project was needed and the relevant situation.' },
-                  { id: 'cs_methodology', label: 'Methodology/Approach', placeholder: 'How you worked on the project.' },
-                  { id: 'cs_tools', label: 'Tools & Technologies', placeholder: 'Software, technologies, or methods used.' },
-                  { id: 'cs_implementation', label: 'Implementation', placeholder: 'What you actually did.' },
-                  { id: 'cs_challenges', label: 'Challenges', placeholder: 'Problems faced during the project.' },
-                  { id: 'cs_solutions', label: 'Solutions', placeholder: 'How you solved those problems.' },
-                  { id: 'cs_results', label: 'Results/Outcomes', placeholder: 'What you achieved, preferably with data or measurable results.' },
-                  { id: 'cs_conclusion', label: 'Conclusion', placeholder: 'Main takeaways from the project.' },
-                  { id: 'cs_futureScope', label: 'Future Scope', placeholder: 'Possible improvements or next steps.' },
+                  { id: 'cs_background', label: 'Background / Context', placeholder: 'Why the project was needed and relevant context.' },
+                  { id: 'cs_methodology', label: 'Methodology / Approach', placeholder: 'How you engineered the solution.' },
+                  { id: 'cs_tools', label: 'Tools & Technologies', placeholder: 'Specific libraries, DBs, and tools employed.' },
+                  { id: 'cs_implementation', label: 'Technical Implementation', placeholder: 'Deep dive into system logic and implementation details.' },
+                  { id: 'cs_challenges', label: 'Engineering Challenges', placeholder: 'Tough problems faced during development.' },
+                  { id: 'cs_solutions', label: 'Solutions & Workarounds', placeholder: 'How you overcame these challenges.' },
+                  { id: 'cs_results', label: 'Results & Impact', placeholder: 'Measurable outcomes, benchmarks, or users served.' },
+                  { id: 'cs_conclusion', label: 'Conclusion & Learnings', placeholder: 'Key takeaways from this build.' },
+                  { id: 'cs_futureScope', label: 'Future Scope', placeholder: 'Next iterations, roadmaps, and extensions.' },
                 ].map(field => (
-                  <div key={field.id} className="space-y-2">
-                    <label className="text-sm font-bold text-gray-300">{field.label}</label>
+                  <div key={field.id} className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                      {field.label}
+                    </label>
                     <textarea 
                       name={field.id}
                       rows="3"
                       placeholder={field.placeholder}
                       value={formData[field.id]}
                       onChange={handleChange}
-                      className="w-full bg-[#111111] border border-gray-800 rounded-lg px-4 py-2 text-white focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent outline-none resize-none"
+                      className="w-full bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none resize-none transition-colors"
                     />
                   </div>
                 ))}
@@ -438,17 +490,17 @@ export default function ProjectForm() {
             )}
           </div>
 
-          <div className="pt-6 border-t border-gray-800 flex justify-end gap-4">
+          <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
             <button 
               type="button" 
               onClick={() => navigate('/admin/projects')}
-              className="px-6 py-2 text-gray-400 hover:text-white font-medium"
+              className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button 
               type="submit" 
-              className="px-6 py-2 bg-cyan-accent text-black font-bold rounded-lg hover:bg-cyan-accent/90"
+              className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-xs cursor-pointer"
             >
               {isEditing ? 'Save Changes' : 'Create Project'}
             </button>

@@ -129,13 +129,16 @@ export default function UsersList() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20 mb-2">
-            <span>👑</span> Superadmin Control
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-mono font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 mb-2">
+            <svg className="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            Superadmin Control
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
             User Accounts & Portfolios
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Create credentials for people and manage their dynamic portfolio accounts
           </p>
         </div>
@@ -146,7 +149,7 @@ export default function UsersList() {
             setSuccessInfo(null);
             setModalError('');
           }}
-          className="self-start sm:self-auto px-5 py-2.5 bg-cyan-accent text-black font-bold rounded-lg hover:bg-cyan-accent/90 transition-colors text-sm flex items-center gap-2 shadow-xs cursor-pointer"
+          className="self-start sm:self-auto px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold rounded-xl transition-colors text-xs sm:text-sm flex items-center gap-2 shadow-xs cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -158,13 +161,13 @@ export default function UsersList() {
       {/* USERS TABLE */}
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center gap-3">
-          <div className="w-8 h-8 border-2 border-cyan-accent border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-gray-500">Loading user accounts...</span>
+          <div className="w-8 h-8 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-slate-500">Loading user accounts...</span>
         </div>
       ) : (
-        <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
-          <table className="w-full text-left text-sm text-gray-600 dark:text-gray-400">
-            <thead className="bg-gray-50 dark:bg-[#161616] text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-800 text-xs uppercase font-semibold">
+        <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
+          <table className="w-full text-left text-sm text-slate-600 dark:text-slate-400">
+            <thead className="bg-slate-50 dark:bg-[#090D16] text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-xs uppercase font-semibold">
               <tr>
                 <th className="px-6 py-4">User</th>
                 <th className="px-6 py-4">Username & Public Link</th>
@@ -186,7 +189,7 @@ export default function UsersList() {
                     </td>
 
                     <td className="px-6 py-4">
-                      <div className="font-mono text-xs font-bold text-cyan-accent">
+                      <div className="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">
                         @{u.username}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
@@ -194,13 +197,13 @@ export default function UsersList() {
                           href={portfolioUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-xs text-gray-500 hover:text-cyan-accent hover:underline flex items-center gap-1"
+                          className="text-xs text-slate-500 hover:text-sky-600 dark:hover:text-sky-400 hover:underline flex items-center gap-1"
                         >
                           <span>Open link</span> &rarr;
                         </a>
                         <button
                           onClick={() => handleCopy(portfolioUrl, u.id)}
-                          className="text-[11px] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-white"
+                          className="text-2xs px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                         >
                           {copiedLink === u.id ? '✓ Copied' : 'Copy'}
                         </button>
@@ -210,15 +213,15 @@ export default function UsersList() {
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                         u.role === 'superadmin'
-                          ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                          : 'bg-cyan-accent/10 text-cyan-accent border border-cyan-accent/20'
+                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 font-mono'
+                          : 'bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-850'
                       }`}>
                         {u.role}
                       </span>
                     </td>
 
                     <td className="px-6 py-4 text-xs">
-                      <span className="font-bold text-gray-900 dark:text-white">{u._count?.projects || 0}</span> projects
+                      <span className="font-bold text-slate-900 dark:text-white">{u._count?.projects || 0}</span> projects
                     </td>
 
                     <td className="px-6 py-4 text-right space-x-3">
@@ -227,7 +230,7 @@ export default function UsersList() {
                           setResetTarget(u);
                           setNewPassword('');
                         }}
-                        className="text-xs font-semibold text-gray-500 hover:text-cyan-accent cursor-pointer"
+                        className="text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer transition-colors"
                       >
                         Reset Password
                       </button>
@@ -290,20 +293,20 @@ export default function UsersList() {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 space-y-2.5 font-mono text-xs">
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 space-y-2.5 font-mono text-xs">
                   <div>
-                    <span className="text-gray-500">Public Link: </span>
-                    <a href={successInfo.url} target="_blank" rel="noreferrer" className="text-cyan-accent font-bold hover:underline">
+                    <span className="text-slate-400">Public Link: </span>
+                    <a href={successInfo.url} target="_blank" rel="noreferrer" className="text-sky-600 dark:text-sky-400 font-semibold hover:underline">
                       {successInfo.url}
                     </a>
                   </div>
                   <div>
-                    <span className="text-gray-500">Login Email: </span>
-                    <span className="text-gray-900 dark:text-white font-bold">{successInfo.email}</span>
+                    <span className="text-slate-400">Login Email: </span>
+                    <span className="text-slate-900 dark:text-white font-bold">{successInfo.email}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Password: </span>
-                    <span className="text-gray-900 dark:text-white font-bold">{successInfo.password}</span>
+                    <span className="text-slate-400">Password: </span>
+                    <span className="text-slate-900 dark:text-white font-bold">{successInfo.password}</span>
                   </div>
                 </div>
 
@@ -313,7 +316,7 @@ export default function UsersList() {
                       setSuccessInfo(null);
                       setModalOpen(false);
                     }}
-                    className="px-5 py-2 bg-cyan-accent text-black font-bold rounded-lg text-xs hover:bg-cyan-accent/90"
+                    className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold rounded-xl text-xs transition-colors cursor-pointer"
                   >
                     Done
                   </button>
@@ -322,9 +325,9 @@ export default function UsersList() {
             ) : (
               <form onSubmit={handleCreateUser} className="p-6 space-y-4">
                 
-                <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">
-                    Full Name <span className="text-red-500">*</span>
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Full Name <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -332,16 +335,16 @@ export default function UsersList() {
                     placeholder="e.g. Alex Robinson"
                     value={form.name}
                     onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                    className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">
-                    Username / Slug <span className="text-red-500">*</span>
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Username / Slug <span className="text-rose-500">*</span>
                   </label>
                   <div className="flex items-center">
-                    <span className="bg-gray-100 dark:bg-gray-800 px-3 py-2 border border-r-0 border-gray-200 dark:border-gray-800 rounded-l-lg text-xs font-mono text-gray-500">
+                    <span className="bg-slate-100 dark:bg-slate-800 px-3 py-2 border border-r-0 border-slate-200 dark:border-slate-800 rounded-l-xl text-xs font-mono text-slate-400">
                       /
                     </span>
                     <input
@@ -350,17 +353,17 @@ export default function UsersList() {
                       placeholder="alex"
                       value={form.username}
                       onChange={e => setForm(p => ({ ...p, username: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '') }))}
-                      className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-r-lg px-3 py-2 text-sm text-gray-900 dark:text-white font-mono outline-none focus:border-cyan-accent"
+                      className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-r-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                     />
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-1">
-                    Their live portfolio will be at: <span className="text-cyan-accent font-mono">{window.location.origin}/{form.username || 'username'}</span>
+                  <p className="text-2xs text-slate-400 mt-1">
+                    Their live portfolio will be at: <span className="text-sky-600 dark:text-sky-400 font-mono">{window.location.origin}/{form.username || 'username'}</span>
                   </p>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">
-                    Login Email <span className="text-red-500">*</span>
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Login Email <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="email"
@@ -368,13 +371,13 @@ export default function UsersList() {
                     placeholder="alex@example.com"
                     value={form.email}
                     onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                    className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">
-                    Password <span className="text-red-500">*</span>
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Password <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -382,22 +385,22 @@ export default function UsersList() {
                     placeholder="Minimum 6 characters"
                     value={form.password}
                     onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white font-mono outline-none focus:border-cyan-accent"
+                    className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
                   <button
                     type="button"
                     onClick={() => setModalOpen(false)}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-300"
+                    className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={creating}
-                    className="px-5 py-2 bg-cyan-accent text-black font-bold rounded-lg text-xs hover:bg-cyan-accent/90 disabled:opacity-50"
+                    className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold rounded-xl text-xs shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
                   >
                     {creating ? 'Creating...' : 'Create User'}
                   </button>
@@ -415,20 +418,20 @@ export default function UsersList() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
           onClick={() => setResetTarget(null)}
         >
-          <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Reset Password for @{resetTarget.username}
             </h3>
             <form onSubmit={handleResetPassword} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">New Password</label>
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">New Password</label>
                 <input
                   type="text"
                   required
                   placeholder="Enter new password"
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm font-mono text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                  className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-sm font-mono text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                 />
               </div>
 
@@ -436,14 +439,14 @@ export default function UsersList() {
                 <button
                   type="button"
                   onClick={() => setResetTarget(null)}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-xs font-semibold"
+                  className="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={resetting}
-                  className="px-5 py-2 bg-cyan-accent text-black font-bold rounded-lg text-xs hover:bg-cyan-accent/90"
+                  className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold rounded-xl text-xs shadow-xs transition-colors cursor-pointer"
                 >
                   {resetting ? 'Saving...' : 'Update Password'}
                 </button>

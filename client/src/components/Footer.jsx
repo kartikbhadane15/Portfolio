@@ -1,9 +1,9 @@
 export default function Footer({ profileData }) {
   const name = profileData?.name || "Kartik Bhadane";
   const tagline = profileData?.tagline || "Software Developer / Full-Stack Engineer";
-  const github = profileData?.githubUrl || "https://github.com/kartikbhadane15";
-  const linkedin = profileData?.linkedinUrl || "https://www.linkedin.com/in/kartik-bhadane-b0464229b/";
-  const email = profileData?.email || "kartikbhadane004@gmail.com";
+  const github = profileData?.githubUrl || (profileData ? null : "https://github.com/kartikbhadane15");
+  const linkedin = profileData?.linkedinUrl || (profileData ? null : "https://www.linkedin.com/in/kartik-bhadane-b0464229b/");
+  const email = profileData?.email || (profileData ? null : "kartikbhadane004@gmail.com");
   const resume = profileData?.resumeUrl || "/resume.pdf";
 
   return (
@@ -14,9 +14,11 @@ export default function Footer({ profileData }) {
           {name}
         </h3>
         
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 text-center">
-          {tagline}
-        </p>
+        {tagline && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 text-center">
+            {tagline}
+          </p>
+        )}
 
         <div className="flex flex-wrap justify-center gap-6 mb-8">
           {github && (
@@ -42,7 +44,7 @@ export default function Footer({ profileData }) {
         </div>
 
         <p className="text-xs text-gray-400 dark:text-gray-600 text-center">
-          &copy; {new Date().getFullYear()} {name}. Built with React & Tailwind.
+          &copy; {new Date().getFullYear()} {name}. All rights reserved.
         </p>
 
       </div>

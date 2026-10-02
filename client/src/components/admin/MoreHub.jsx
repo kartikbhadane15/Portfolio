@@ -240,9 +240,9 @@ export default function MoreHub() {
   };
 
   const tabs = [
-    { id: 'education', name: 'Education', icon: '🎓', count: education.length },
-    { id: 'certifications', name: 'Certifications', icon: '📜', count: certifications.length },
-    { id: 'achievements', name: 'Achievements', icon: '🏆', count: achievements.length },
+    { id: 'education', name: 'Education', count: education.length },
+    { id: 'certifications', name: 'Certifications', count: certifications.length },
+    { id: 'achievements', name: 'Achievements', count: achievements.length },
   ];
 
   return (
@@ -251,18 +251,18 @@ export default function MoreHub() {
       {/* Page Title & Subtitle */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-            Credentials & Background
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            Credentials &amp; Background
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Manage your Education history, Certificates & Licenses, and Career Achievements
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Manage your Education history, Certificates &amp; Licenses, and Career Achievements
           </p>
         </div>
 
         {/* Add Button for Active Tab */}
         <button
           onClick={() => openAddModal(activeTab)}
-          className="self-start sm:self-auto px-5 py-2.5 bg-cyan-accent text-black font-bold rounded-lg hover:bg-cyan-accent/90 transition-colors text-sm flex items-center gap-2 shadow-xs cursor-pointer"
+          className="self-start sm:self-auto px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -272,23 +272,22 @@ export default function MoreHub() {
       </div>
 
       {/* Sub-Section Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 pb-1 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === tab.id
-                ? 'bg-cyan-accent/10 text-cyan-accent border border-cyan-accent/30'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-900/50'
+                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
             }`}
           >
-            <span>{tab.icon}</span>
             <span>{tab.name}</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full ${
+            <span className={`text-[11px] px-2 py-0.5 rounded-full font-mono ${
               activeTab === tab.id
-                ? 'bg-cyan-accent text-black font-bold'
-                : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                ? 'bg-slate-800 text-slate-200 dark:bg-slate-200 dark:text-slate-900'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
             }`}>
               {tab.count}
             </span>
@@ -299,29 +298,33 @@ export default function MoreHub() {
       {/* TAB CONTENT */}
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center gap-3">
-          <div className="w-8 h-8 border-2 border-cyan-accent border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-gray-500">Loading credentials...</span>
+          <div className="w-8 h-8 border-3 border-slate-900 dark:border-white border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Loading credentials...</span>
         </div>
       ) : (
         <div>
           {/* 1. EDUCATION TAB */}
           {activeTab === 'education' && (
-            <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
               {education.length === 0 ? (
-                <div className="py-16 text-center">
-                  <div className="w-12 h-12 rounded-full bg-cyan-accent/10 text-cyan-accent flex items-center justify-center mx-auto mb-3 text-xl">🎓</div>
-                  <h4 className="text-base font-bold text-gray-900 dark:text-white">No education records yet</h4>
-                  <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto mb-4">Add your university, college, or high school degree details.</p>
+                <div className="py-16 text-center p-6">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5" />
+                    </svg>
+                  </div>
+                  <h4 className="text-base font-bold text-slate-900 dark:text-white">No education records yet</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto mb-4">Add your university, college, or school degree details.</p>
                   <button
                     onClick={() => openAddModal('education')}
-                    className="px-4 py-2 bg-cyan-accent text-black font-bold rounded-lg text-xs"
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold rounded-xl text-xs transition-colors cursor-pointer shadow-xs"
                   >
                     + Add Education
                   </button>
                 </div>
               ) : (
-                <table className="w-full text-left text-sm text-gray-600 dark:text-gray-400">
-                  <thead className="bg-gray-50 dark:bg-[#161616] text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-800 text-xs uppercase font-semibold">
+                <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+                  <thead className="bg-slate-50 dark:bg-[#090D16] text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-xs uppercase font-semibold">
                     <tr>
                       <th className="px-6 py-3.5">Degree / Course</th>
                       <th className="px-6 py-3.5">Institution</th>
@@ -329,29 +332,29 @@ export default function MoreHub() {
                       <th className="px-6 py-3.5 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-800/60">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {education.map(item => (
-                      <tr key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                      <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
                         <td className="px-6 py-4">
-                          <div className="font-bold text-gray-900 dark:text-white">{item.degree}</div>
-                          {item.fieldOfStudy && <div className="text-xs text-cyan-accent mt-0.5">{item.fieldOfStudy}</div>}
+                          <div className="font-semibold text-slate-900 dark:text-white">{item.degree}</div>
+                          {item.fieldOfStudy && <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{item.fieldOfStudy}</div>}
                         </td>
-                        <td className="px-6 py-4 text-gray-800 dark:text-gray-200 font-medium">
+                        <td className="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
                           {item.institution}
                         </td>
-                        <td className="px-6 py-4 text-xs">
-                          {formatDate(item.startDate)} — {item.endDate ? formatDate(item.endDate) : <span className="text-cyan-accent font-semibold">Present</span>}
+                        <td className="px-6 py-4 text-xs font-mono text-slate-500 dark:text-slate-400">
+                          {formatDate(item.startDate)} — {item.endDate ? formatDate(item.endDate) : <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Present</span>}
                         </td>
                         <td className="px-6 py-4 text-right space-x-3">
                           <button
                             onClick={() => openEditModal('education', item)}
-                            className="text-xs font-semibold text-cyan-accent hover:underline"
+                            className="text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => setDeleteTarget({ type: 'education', id: item.id, title: `${item.degree} at ${item.institution}` })}
-                            className="text-xs font-semibold text-red-500 hover:underline"
+                            className="text-xs font-semibold text-red-600 dark:text-red-400 hover:underline cursor-pointer"
                           >
                             Delete
                           </button>
@@ -366,22 +369,26 @@ export default function MoreHub() {
 
           {/* 2. CERTIFICATIONS TAB */}
           {activeTab === 'certifications' && (
-            <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
               {certifications.length === 0 ? (
-                <div className="py-16 text-center">
-                  <div className="w-12 h-12 rounded-full bg-cyan-accent/10 text-cyan-accent flex items-center justify-center mx-auto mb-3 text-xl">📜</div>
-                  <h4 className="text-base font-bold text-gray-900 dark:text-white">No certifications yet</h4>
-                  <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto mb-4">Add your technical certificates, licenses, and verified courses.</p>
+                <div className="py-16 text-center p-6">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-base font-bold text-slate-900 dark:text-white">No certifications yet</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto mb-4">Add your technical certificates, licenses, and verified courses.</p>
                   <button
                     onClick={() => openAddModal('certifications')}
-                    className="px-4 py-2 bg-cyan-accent text-black font-bold rounded-lg text-xs"
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold rounded-xl text-xs transition-colors cursor-pointer shadow-xs"
                   >
                     + Add Certification
                   </button>
                 </div>
               ) : (
-                <table className="w-full text-left text-sm text-gray-600 dark:text-gray-400">
-                  <thead className="bg-gray-50 dark:bg-[#161616] text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-800 text-xs uppercase font-semibold">
+                <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+                  <thead className="bg-slate-50 dark:bg-[#090D16] text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-xs uppercase font-semibold">
                     <tr>
                       <th className="px-6 py-3.5">Certificate</th>
                       <th className="px-6 py-3.5">Issuer</th>
@@ -389,33 +396,33 @@ export default function MoreHub() {
                       <th className="px-6 py-3.5 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-800/60">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {certifications.map(item => (
-                      <tr key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                      <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
                         <td className="px-6 py-4">
-                          <div className="font-bold text-gray-900 dark:text-white">{item.name}</div>
+                          <div className="font-semibold text-slate-900 dark:text-white">{item.name}</div>
                           {item.url && (
-                            <a href={item.url} target="_blank" rel="noreferrer" className="text-xs text-cyan-accent hover:underline flex items-center gap-1 mt-0.5">
+                            <a href={item.url} target="_blank" rel="noreferrer" className="text-xs text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 mt-0.5">
                               <span>Credential link</span> &rarr;
                             </a>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-gray-800 dark:text-gray-200 font-medium">
+                        <td className="px-6 py-4 text-slate-700 dark:text-slate-300 font-medium">
                           {item.issuer}
                         </td>
-                        <td className="px-6 py-4 text-xs">
+                        <td className="px-6 py-4 text-xs font-mono text-slate-500 dark:text-slate-400">
                           {formatDate(item.date)}
                         </td>
                         <td className="px-6 py-4 text-right space-x-3">
                           <button
                             onClick={() => openEditModal('certifications', item)}
-                            className="text-xs font-semibold text-cyan-accent hover:underline"
+                            className="text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => setDeleteTarget({ type: 'certifications', id: item.id, title: item.name })}
-                            className="text-xs font-semibold text-red-500 hover:underline"
+                            className="text-xs font-semibold text-red-600 dark:text-red-400 hover:underline cursor-pointer"
                           >
                             Delete
                           </button>
@@ -430,22 +437,26 @@ export default function MoreHub() {
 
           {/* 3. ACHIEVEMENTS TAB */}
           {activeTab === 'achievements' && (
-            <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
               {achievements.length === 0 ? (
-                <div className="py-16 text-center">
-                  <div className="w-12 h-12 rounded-full bg-cyan-accent/10 text-cyan-accent flex items-center justify-center mx-auto mb-3 text-xl">🏆</div>
-                  <h4 className="text-base font-bold text-gray-900 dark:text-white">No achievements yet</h4>
-                  <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto mb-4">Add your hackathon wins, awards, honors, and notable accomplishments.</p>
+                <div className="py-16 text-center p-6">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-base font-bold text-slate-900 dark:text-white">No achievements yet</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto mb-4">Add your hackathon wins, awards, honors, and notable accomplishments.</p>
                   <button
                     onClick={() => openAddModal('achievements')}
-                    className="px-4 py-2 bg-cyan-accent text-black font-bold rounded-lg text-xs"
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold rounded-xl text-xs transition-colors cursor-pointer shadow-xs"
                   >
                     + Add Achievement
                   </button>
                 </div>
               ) : (
-                <table className="w-full text-left text-sm text-gray-600 dark:text-gray-400">
-                  <thead className="bg-gray-50 dark:bg-[#161616] text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-800 text-xs uppercase font-semibold">
+                <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+                  <thead className="bg-slate-50 dark:bg-[#090D16] text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-xs uppercase font-semibold">
                     <tr>
                       <th className="px-6 py-3.5">Achievement</th>
                       <th className="px-6 py-3.5">Description</th>
@@ -453,28 +464,28 @@ export default function MoreHub() {
                       <th className="px-6 py-3.5 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-800/60">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {achievements.map(item => (
-                      <tr key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                      <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
                         <td className="px-6 py-4">
-                          <div className="font-bold text-gray-900 dark:text-white">{item.title}</div>
+                          <div className="font-semibold text-slate-900 dark:text-white">{item.title}</div>
                         </td>
-                        <td className="px-6 py-4 max-w-md text-xs text-gray-600 dark:text-gray-400">
+                        <td className="px-6 py-4 max-w-md text-xs text-slate-600 dark:text-slate-400">
                           {item.description || '—'}
                         </td>
-                        <td className="px-6 py-4 text-xs whitespace-nowrap">
+                        <td className="px-6 py-4 text-xs font-mono text-slate-500 dark:text-slate-400 whitespace-nowrap">
                           {formatDate(item.date)}
                         </td>
                         <td className="px-6 py-4 text-right space-x-3">
                           <button
                             onClick={() => openEditModal('achievements', item)}
-                            className="text-xs font-semibold text-cyan-accent hover:underline"
+                            className="text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => setDeleteTarget({ type: 'achievements', id: item.id, title: item.title })}
-                            className="text-xs font-semibold text-red-500 hover:underline"
+                            className="text-xs font-semibold text-red-600 dark:text-red-400 hover:underline cursor-pointer"
                           >
                             Delete
                           </button>
@@ -492,17 +503,17 @@ export default function MoreHub() {
       {/* MODAL: ADD / EDIT */}
       {modalType && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4"
           onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
         >
-          <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150">
+          <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150">
             
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                 {editingItem ? 'Edit' : 'Add'} {modalType === 'education' ? 'Education' : modalType === 'certifications' ? 'Certification' : 'Achievement'}
               </h3>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:hover:text-white">
+              <button onClick={closeModal} className="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -511,7 +522,7 @@ export default function MoreHub() {
 
             {/* Error Alert */}
             {modalError && (
-              <div className="mx-6 mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs">
+              <div className="mx-6 mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs">
                 {modalError}
               </div>
             )}
@@ -520,59 +531,59 @@ export default function MoreHub() {
             {modalType === 'education' && (
               <form onSubmit={handleSaveEducation} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Institution <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Institution <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Stanford University"
                     value={eduForm.institution}
                     onChange={e => setEduForm(p => ({ ...p, institution: e.target.value }))}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                    className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Degree <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Degree <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Bachelor of Technology"
                     value={eduForm.degree}
                     onChange={e => setEduForm(p => ({ ...p, degree: e.target.value }))}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                    className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Field of Study</label>
+                  <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Field of Study</label>
                   <input
                     type="text"
                     placeholder="e.g. Computer Science and Engineering"
                     value={eduForm.fieldOfStudy}
                     onChange={e => setEduForm(p => ({ ...p, fieldOfStudy: e.target.value }))}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                    className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Start Date <span className="text-red-500">*</span></label>
+                    <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Start Date <span className="text-red-500">*</span></label>
                     <input
                       type="date"
                       required
                       value={eduForm.startDate}
                       onChange={e => setEduForm(p => ({ ...p, startDate: e.target.value }))}
-                      className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                      className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1">End Date</label>
+                    <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">End Date</label>
                     <input
                       type="date"
                       disabled={eduForm.isPresent}
                       value={eduForm.endDate}
                       onChange={e => setEduForm(p => ({ ...p, endDate: e.target.value }))}
-                      className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent disabled:opacity-40"
+                      className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors disabled:opacity-40"
                     />
                   </div>
                 </div>
@@ -583,18 +594,18 @@ export default function MoreHub() {
                     id="edu-present"
                     checked={eduForm.isPresent}
                     onChange={e => setEduForm(p => ({ ...p, isPresent: e.target.checked, endDate: e.target.checked ? '' : p.endDate }))}
-                    className="accent-cyan-accent rounded"
+                    className="accent-slate-900 dark:accent-sky-500 rounded"
                   />
-                  <label htmlFor="edu-present" className="text-xs text-gray-700 dark:text-gray-300 font-medium cursor-pointer">
+                  <label htmlFor="edu-present" className="text-xs text-slate-700 dark:text-slate-300 font-medium cursor-pointer">
                     I am currently studying here (Present)
                   </label>
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <button type="button" onClick={closeModal} className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-300">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                  <button type="button" onClick={closeModal} className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
                     Cancel
                   </button>
-                  <button type="submit" disabled={saving} className="px-5 py-2 bg-cyan-accent text-black font-bold rounded-lg text-xs hover:bg-cyan-accent/90 disabled:opacity-50">
+                  <button type="submit" disabled={saving} className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold rounded-xl text-xs transition-colors shadow-xs disabled:opacity-50 cursor-pointer">
                     {saving ? 'Saving...' : editingItem ? 'Update Education' : 'Add Education'}
                   </button>
                 </div>
@@ -605,56 +616,56 @@ export default function MoreHub() {
             {modalType === 'certifications' && (
               <form onSubmit={handleSaveCertification} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Certificate Name <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Certificate Name <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. AWS Certified Solutions Architect"
                     value={certForm.name}
                     onChange={e => setCertForm(p => ({ ...p, name: e.target.value }))}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                    className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Issuer / Organization <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Issuer / Organization <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Amazon Web Services, Google, Meta"
                     value={certForm.issuer}
                     onChange={e => setCertForm(p => ({ ...p, issuer: e.target.value }))}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                    className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Issue Date <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Issue Date <span className="text-red-500">*</span></label>
                   <input
                     type="date"
                     required
                     value={certForm.date}
                     onChange={e => setCertForm(p => ({ ...p, date: e.target.value }))}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                    className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Credential URL (optional)</label>
+                  <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Credential URL (optional)</label>
                   <input
                     type="url"
                     placeholder="https://..."
                     value={certForm.url}
                     onChange={e => setCertForm(p => ({ ...p, url: e.target.value }))}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                    className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <button type="button" onClick={closeModal} className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-300">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                  <button type="button" onClick={closeModal} className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
                     Cancel
                   </button>
-                  <button type="submit" disabled={saving} className="px-5 py-2 bg-cyan-accent text-black font-bold rounded-lg text-xs hover:bg-cyan-accent/90 disabled:opacity-50">
+                  <button type="submit" disabled={saving} className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold rounded-xl text-xs transition-colors shadow-xs disabled:opacity-50 cursor-pointer">
                     {saving ? 'Saving...' : editingItem ? 'Update Certification' : 'Add Certification'}
                   </button>
                 </div>
@@ -665,44 +676,44 @@ export default function MoreHub() {
             {modalType === 'achievements' && (
               <form onSubmit={handleSaveAchievement} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Achievement Title <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Achievement Title <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. 1st Place at HackDavis 2024"
                     value={achForm.title}
                     onChange={e => setAchForm(p => ({ ...p, title: e.target.value }))}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                    className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Date <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Date <span className="text-red-500">*</span></label>
                   <input
                     type="date"
                     required
                     value={achForm.date}
                     onChange={e => setAchForm(p => ({ ...p, date: e.target.value }))}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent"
+                    className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Description</label>
+                  <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Description</label>
                   <textarea
                     rows="4"
                     placeholder="Briefly describe your achievement, impact, or recognition..."
                     value={achForm.description}
                     onChange={e => setAchForm(p => ({ ...p, description: e.target.value }))}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-cyan-accent resize-none"
+                    className="w-full bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 resize-none transition-colors"
                   ></textarea>
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <button type="button" onClick={closeModal} className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-300">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                  <button type="button" onClick={closeModal} className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
                     Cancel
                   </button>
-                  <button type="submit" disabled={saving} className="px-5 py-2 bg-cyan-accent text-black font-bold rounded-lg text-xs hover:bg-cyan-accent/90 disabled:opacity-50">
+                  <button type="submit" disabled={saving} className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold rounded-xl text-xs transition-colors shadow-xs disabled:opacity-50 cursor-pointer">
                     {saving ? 'Saving...' : editingItem ? 'Update Achievement' : 'Add Achievement'}
                   </button>
                 </div>
