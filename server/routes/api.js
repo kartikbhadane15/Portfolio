@@ -2,6 +2,22 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient');
 
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
+
+// Helper to check if the incoming request is from a logged-in superadmin
+const checkIsSuperAdmin = (req) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) return false;
+    const decoded = jwt.verify(token, JWT_SECRET);
+    return decoded && decoded.role === 'superadmin';
+  } catch (err) {
+    return false;
+  }
+};
+
 // Helper to get default user (Kartik/Superadmin)
 const getDefaultUser = async () => {
   return await prisma.user.findFirst({
@@ -31,11 +47,44 @@ router.get('/public/:username/data', async (req, res) => {
     const username = req.params.username.toLowerCase();
     const user = await prisma.user.findFirst({
       where: { username: { equals: username, mode: 'insensitive' } },
-      select: { id: true, username: true, email: true, role: true }
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        isBlocked: true,
+        subscriptionStatus: true,
+        subscriptionDurationMonths: true,
+        subscriptionStartedAt: true,
+        subscriptionExpiresAt: true
+      }
     });
 
     if (!user) {
       return res.status(404).json({ error: `Portfolio for user '${req.params.username}' not found` });
+    }
+
+    const isSuperAdmin = checkIsSuperAdmin(req);
+    const isBlocked = Boolean(user.isBlocked);
+    const isExpired = user.role !== 'superadmin' && user.subscriptionExpiresAt
+      ? new Date() > new Date(user.subscriptionExpiresAt)
+      : false;
+
+    // If user portfolio is blocked or subscription is expired:
+    // Only superadmin can view it! Public viewers receive 403 Forbidden.
+    if (user.role !== 'superadmin' && (isBlocked || isExpired)) {
+      if (!isSuperAdmin) {
+        return res.status(403).json({
+          error: 'Portfolio unavailable',
+          isInactive: true,
+          isBlocked,
+          isExpired,
+          message: isBlocked
+            ? 'This portfolio has been suspended by the administrator.'
+            : 'This portfolio subscription has expired. Please contact the administrator.',
+          username: user.username
+        });
+      }
     }
 
     const [profile, projects, experience, skills, education, certifications, achievements, settings] = await Promise.all([
@@ -79,6 +128,12 @@ router.get('/public/:username/data', async (req, res) => {
     res.json({
       user,
       profile,
+      adminPreview: (isSuperAdmin && (isBlocked || isExpired)) ? {
+        isBlocked,
+        isExpired,
+        subscriptionExpiresAt: user.subscriptionExpiresAt,
+        subscriptionDurationMonths: user.subscriptionDurationMonths
+      } : null,
       projects: projects.map(p => ({
         ...p,
         description: p.shortDescription,
@@ -112,6 +167,18 @@ router.post('/public/:username/contact', async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ error: 'User recipient not found' });
+    }
+
+    // Disallow contact if user is blocked or expired
+    if (user.role !== 'superadmin') {
+      const isExpired = user.subscriptionExpiresAt ? (new Date() > new Date(user.subscriptionExpiresAt)) : false;
+      if (user.isBlocked || isExpired) {
+        return res.status(403).json({
+          error: user.isBlocked
+            ? 'This portfolio is suspended. Messages cannot be sent.'
+            : 'This portfolio subscription has expired. Messages cannot be sent.'
+        });
+      }
     }
 
     const { name, email, message } = req.body;

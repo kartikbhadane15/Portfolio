@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Experience from '../components/sections/Experience';
 import { fetchPublicPortfolio } from '../utils/api';
+import PortfolioInactive from '../components/PortfolioInactive';
 
 export default function ExperiencePage() {
   const { username: routeUsername } = useParams();
   const username = routeUsername || 'kartik';
   const [experienceData, setExperienceData] = useState([]);
   const [profile, setProfile] = useState(null);
+  const [inactiveInfo, setInactiveInfo] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -28,8 +30,22 @@ export default function ExperiencePage() {
       })
       .catch((err) => {
         console.error('Failed to load user experience:', err);
+        if (err.response?.status === 403 || err.response?.data?.isInactive) {
+          setInactiveInfo(err.response?.data || { isBlocked: true, message: 'Portfolio unavailable' });
+        }
       });
   }, [username]);
+
+  if (inactiveInfo) {
+    return (
+      <PortfolioInactive
+        username={username}
+        isBlocked={inactiveInfo.isBlocked}
+        isExpired={inactiveInfo.isExpired}
+        message={inactiveInfo.message}
+      />
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-[#050505] transition-colors duration-300 pb-12">

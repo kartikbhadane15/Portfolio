@@ -113,7 +113,7 @@ export default function CaseStudyPage() {
       )}
 
       {/* Case Study Content */}
-      {caseStudy ? (
+      {caseStudy && project.showCaseStudy ? (
         <article className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-cyan">
           {caseStudy.overview && (
             <section className="mb-12">

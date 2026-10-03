@@ -62,7 +62,7 @@ export default function ProjectForm() {
           featuredOrder: project.featuredOrder || 0,
           screenshots: project.screenshots || [],
           websiteUrl: project.websiteUrl || '',
-          showCaseStudy: !!project.caseStudy,
+          showCaseStudy: typeof project.showCaseStudy === 'boolean' ? project.showCaseStudy : !!project.caseStudy,
           cs_overview: project.caseStudy?.overview || '',
           cs_problemStatement: project.caseStudy?.problemStatement || '',
           cs_objectives: project.caseStudy?.objectives || '',
@@ -151,7 +151,8 @@ export default function ProjectForm() {
       tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
       screenshots: formData.screenshots.filter(Boolean),
       featuredOrder: Number(formData.featuredOrder),
-      caseStudy: formData.showCaseStudy ? {
+      showCaseStudy: formData.showCaseStudy,
+      caseStudy: {
         overview: formData.cs_overview,
         problemStatement: formData.cs_problemStatement,
         objectives: formData.cs_objectives,
@@ -164,7 +165,7 @@ export default function ProjectForm() {
         results: formData.cs_results,
         conclusion: formData.cs_conclusion,
         futureScope: formData.cs_futureScope
-      } : null
+      }
     };
 
     try {
@@ -442,52 +443,66 @@ export default function ProjectForm() {
                 <p className="text-xs text-slate-500 dark:text-slate-400">Optional engineering breakdown for recruiters and visitors</p>
               </div>
 
-              <label className="flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  name="showCaseStudy"
-                  className="sr-only"
-                  checked={formData.showCaseStudy}
-                  onChange={handleChange}
-                />
-                <div className={`w-11 h-6 rounded-full transition-colors ${formData.showCaseStudy ? 'bg-slate-900 dark:bg-sky-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
-                  <div className={`w-5 h-5 bg-white rounded-full transition-transform mt-0.5 ml-0.5 ${formData.showCaseStudy ? 'translate-x-5' : ''}`} />
-                </div>
-              </label>
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold text-slate-500">Show in portfolio</span>
+                <label className="flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    name="showCaseStudy"
+                    className="sr-only"
+                    checked={formData.showCaseStudy}
+                    onChange={handleChange}
+                  />
+                  <div className={`w-11 h-6 rounded-full transition-colors ${formData.showCaseStudy ? 'bg-slate-900 dark:bg-sky-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                    <div className={`w-5 h-5 bg-white rounded-full transition-transform mt-0.5 ml-0.5 ${formData.showCaseStudy ? 'translate-x-5' : ''}`} />
+                  </div>
+                </label>
+              </div>
             </div>
             
-            {formData.showCaseStudy && (
-              <div className="space-y-5 mt-4 p-5 sm:p-6 rounded-2xl bg-slate-50/80 dark:bg-[#090D16]/80 border border-slate-200 dark:border-slate-800">
-                {[
-                  { id: 'cs_overview', label: 'Project Overview', placeholder: 'What the project is about.' },
-                  { id: 'cs_problemStatement', label: 'Problem Statement', placeholder: 'The problem or need you wanted to solve.' },
-                  { id: 'cs_objectives', label: 'Objectives', placeholder: 'What the project aimed to achieve.' },
-                  { id: 'cs_background', label: 'Background / Context', placeholder: 'Why the project was needed and relevant context.' },
-                  { id: 'cs_methodology', label: 'Methodology / Approach', placeholder: 'How you engineered the solution.' },
-                  { id: 'cs_tools', label: 'Tools & Technologies', placeholder: 'Specific libraries, DBs, and tools employed.' },
-                  { id: 'cs_implementation', label: 'Technical Implementation', placeholder: 'Deep dive into system logic and implementation details.' },
-                  { id: 'cs_challenges', label: 'Engineering Challenges', placeholder: 'Tough problems faced during development.' },
-                  { id: 'cs_solutions', label: 'Solutions & Workarounds', placeholder: 'How you overcame these challenges.' },
-                  { id: 'cs_results', label: 'Results & Impact', placeholder: 'Measurable outcomes, benchmarks, or users served.' },
-                  { id: 'cs_conclusion', label: 'Conclusion & Learnings', placeholder: 'Key takeaways from this build.' },
-                  { id: 'cs_futureScope', label: 'Future Scope', placeholder: 'Next iterations, roadmaps, and extensions.' },
-                ].map(field => (
-                  <div key={field.id} className="space-y-1.5">
+            <div className="text-xs text-sky-600 dark:text-sky-400 mb-2 font-medium">
+              Note: All data entered below is securely uploaded and saved in the database, even if you toggle the visibility off.
+            </div>
+
+            <div className="space-y-5 mt-4 p-5 sm:p-6 rounded-2xl bg-slate-50/80 dark:bg-[#090D16]/80 border border-slate-200 dark:border-slate-800">
+              {[
+                { id: 'cs_overview', label: 'Project Overview', placeholder: 'What the project is about.' },
+                { id: 'cs_problemStatement', label: 'Problem Statement', placeholder: 'The problem or need you wanted to solve.' },
+                { id: 'cs_objectives', label: 'Objectives', placeholder: 'What the project aimed to achieve.' },
+                { id: 'cs_background', label: 'Background / Context', placeholder: 'Why the project was needed and relevant context.' },
+                { id: 'cs_methodology', label: 'Methodology / Approach', placeholder: 'How you engineered the solution.' },
+                { id: 'cs_tools', label: 'Tools & Technologies', placeholder: 'Specific libraries, DBs, and tools employed.' },
+                { id: 'cs_implementation', label: 'Technical Implementation', placeholder: 'Deep dive into system logic and implementation details.' },
+                { id: 'cs_challenges', label: 'Engineering Challenges', placeholder: 'Tough problems faced during development.' },
+                { id: 'cs_solutions', label: 'Solutions & Workarounds', placeholder: 'How you overcame these challenges.' },
+                { id: 'cs_results', label: 'Results & Impact', placeholder: 'Measurable outcomes, benchmarks, or users served.' },
+                { id: 'cs_conclusion', label: 'Conclusion & Learnings', placeholder: 'Key takeaways from this build.' },
+                { id: 'cs_futureScope', label: 'Future Scope', placeholder: 'Next iterations, roadmaps, and extensions.' },
+              ].map(field => (
+                <div key={field.id} className="space-y-1.5">
+                  <div className="flex justify-between items-center">
                     <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                       {field.label}
                     </label>
-                    <textarea 
-                      name={field.id}
-                      rows="3"
-                      placeholder={field.placeholder}
-                      value={formData[field.id]}
-                      onChange={handleChange}
-                      className="w-full bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none resize-none transition-colors"
-                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setFormData(prev => ({ ...prev, [field.id]: '' }))}
+                      className="text-[10px] sm:text-xs font-semibold text-slate-500 hover:text-red-500 transition-colors uppercase"
+                    >
+                      Clear Data
+                    </button>
                   </div>
-                ))}
-              </div>
-            )}
+                  <textarea 
+                    name={field.id}
+                    rows="3"
+                    placeholder={field.placeholder}
+                    value={formData[field.id]}
+                    onChange={handleChange}
+                    className="w-full bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none resize-none transition-colors"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">

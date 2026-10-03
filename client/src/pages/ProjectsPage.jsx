@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { fetchPublicPortfolio } from '../utils/api';
 import { formatProjectDuration } from '../utils/dateFormatter';
+import PortfolioInactive from '../components/PortfolioInactive';
 
 function normalizeCategory(type) {
   if (!type) return 'Web';
@@ -22,6 +23,8 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
+
+  const [inactiveInfo, setInactiveInfo] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -54,11 +57,25 @@ export default function ProjectsPage() {
       })
       .catch((err) => {
         console.error('Failed to load user projects:', err);
+        if (err.response?.status === 403 || err.response?.data?.isInactive) {
+          setInactiveInfo(err.response?.data || { isBlocked: true, message: 'Portfolio unavailable' });
+        }
       })
       .finally(() => {
         setLoading(false);
       });
   }, [username]);
+
+  if (inactiveInfo) {
+    return (
+      <PortfolioInactive
+        username={username}
+        isBlocked={inactiveInfo.isBlocked}
+        isExpired={inactiveInfo.isExpired}
+        message={inactiveInfo.message}
+      />
+    );
+  }
 
   // Compute categories for filter pills
   const categories = useMemo(() => {
@@ -200,7 +217,7 @@ export default function ProjectsPage() {
                   {/* Divider */}
                   <div className="border-t border-gray-100 dark:border-zinc-800/80 pt-4 mt-auto">
                     <div className="flex items-center text-sm font-semibold text-gray-900 dark:text-gray-200 group-hover:text-cyan-accent transition-colors">
-                      <span>Explore Case Study</span>
+                      <span>{project.showCaseStudy ? 'Explore Case Study' : 'View Details'}</span>
                       <svg
                         className="w-4 h-4 ml-1.5 transition-transform duration-200 group-hover:translate-x-1"
                         fill="none"

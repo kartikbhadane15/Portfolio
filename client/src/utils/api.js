@@ -104,6 +104,8 @@ export const fetchAdminUsers = () => api.get('/admin/users').then(res => res.dat
 export const createAdminUser = (data) => api.post('/admin/users', data).then(res => res.data);
 export const resetAdminUserPassword = (id, newPassword) => api.put(`/admin/users/${id}/password`, { newPassword }).then(res => res.data);
 export const deleteAdminUser = (id) => api.delete(`/admin/users/${id}`).then(res => res.data);
+export const toggleAdminUserBlock = (id, isBlocked) => api.patch(`/admin/users/${id}/block`, { isBlocked }).then(res => res.data);
+export const updateAdminUserSubscription = (id, data) => api.patch(`/admin/users/${id}/subscription`, data).then(res => res.data);
 
 
 

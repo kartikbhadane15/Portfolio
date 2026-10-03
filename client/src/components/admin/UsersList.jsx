@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { fetchAdminUsers, createAdminUser, resetAdminUserPassword, deleteAdminUser } from '../../utils/api';
+import {
+  fetchAdminUsers,
+  createAdminUser,
+  resetAdminUserPassword,
+  deleteAdminUser,
+  toggleAdminUserBlock,
+  updateAdminUserSubscription
+} from '../../utils/api';
 
 export default function UsersList() {
   const [users, setUsers] = useState([]);
@@ -9,12 +16,13 @@ export default function UsersList() {
   const [modalError, setModalError] = useState('');
   const [successInfo, setSuccessInfo] = useState(null);
 
-  // Form State
+  // Form State for New User
   const [form, setForm] = useState({
     name: '',
     username: '',
     email: '',
-    password: ''
+    password: '',
+    subscriptionDurationMonths: 1
   });
 
   // Password reset modal state
@@ -26,7 +34,18 @@ export default function UsersList() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Block modal state
+  const [blockTarget, setBlockTarget] = useState(null);
+  const [blocking, setBlocking] = useState(false);
+
+  // Subscription modal state
+  const [subscriptionTarget, setSubscriptionTarget] = useState(null);
+  const [subMonths, setSubMonths] = useState(1);
+  const [extendCurrent, setExtendCurrent] = useState(false);
+  const [submittingSub, setSubmittingSub] = useState(false);
+
   const [copiedLink, setCopiedLink] = useState('');
+  const [actionSuccessMessage, setActionSuccessMessage] = useState('');
 
   useEffect(() => {
     loadUsers();
@@ -44,6 +63,11 @@ export default function UsersList() {
     }
   };
 
+  const showToast = (msg) => {
+    setActionSuccessMessage(msg);
+    setTimeout(() => setActionSuccessMessage(''), 4000);
+  };
+
   const handleCreateUser = async (e) => {
     e.preventDefault();
     setModalError('');
@@ -58,21 +82,24 @@ export default function UsersList() {
 
     setCreating(true);
     try {
-      const res = await createAdminUser({
+      const duration = parseInt(form.subscriptionDurationMonths) || 1;
+      await createAdminUser({
         name: form.name.trim(),
         username: form.username.trim().toLowerCase(),
         email: form.email.trim().toLowerCase(),
-        password: form.password
+        password: form.password,
+        subscriptionDurationMonths: duration
       });
 
       setSuccessInfo({
         username: form.username.trim().toLowerCase(),
         email: form.email.trim().toLowerCase(),
         password: form.password,
+        durationMonths: duration,
         url: `${window.location.origin}/${form.username.trim().toLowerCase()}`
       });
 
-      setForm({ name: '', username: '', email: '', password: '' });
+      setForm({ name: '', username: '', email: '', password: '', subscriptionDurationMonths: 1 });
       loadUsers();
     } catch (err) {
       console.error(err);
@@ -91,7 +118,7 @@ export default function UsersList() {
     setResetting(true);
     try {
       await resetAdminUserPassword(resetTarget.id, newPassword);
-      alert(`Password for @${resetTarget.username} updated successfully!`);
+      showToast(`Password for @${resetTarget.username} updated successfully!`);
       setResetTarget(null);
       setNewPassword('');
     } catch (err) {
@@ -108,6 +135,7 @@ export default function UsersList() {
     try {
       await deleteAdminUser(deleteTarget.id);
       setUsers(prev => prev.filter(u => u.id !== deleteTarget.id));
+      showToast(`User @${deleteTarget.username} deleted.`);
       setDeleteTarget(null);
     } catch (err) {
       console.error(err);
@@ -117,15 +145,124 @@ export default function UsersList() {
     }
   };
 
+  const handleToggleBlock = async () => {
+    if (!blockTarget) return;
+    setBlocking(true);
+    const newBlockedState = !blockTarget.isBlocked;
+    try {
+      const res = await toggleAdminUserBlock(blockTarget.id, newBlockedState);
+      setUsers(prev => prev.map(u => u.id === blockTarget.id ? { ...u, ...res.user } : u));
+      showToast(res.message || (newBlockedState ? `Blocked @${blockTarget.username}` : `Unblocked @${blockTarget.username}`));
+      setBlockTarget(null);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to change block status.');
+    } finally {
+      setBlocking(false);
+    }
+  };
+
+  const handleUpdateSubscription = async (e) => {
+    e.preventDefault();
+    if (!subscriptionTarget) return;
+    setSubmittingSub(true);
+    try {
+      const res = await updateAdminUserSubscription(subscriptionTarget.id, {
+        durationMonths: subMonths,
+        extendCurrent: extendCurrent
+      });
+      setUsers(prev => prev.map(u => u.id === subscriptionTarget.id ? { ...u, ...res.user } : u));
+      showToast(res.message || `Subscription updated for @${subscriptionTarget.username}!`);
+      setSubscriptionTarget(null);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to update subscription.');
+    } finally {
+      setSubmittingSub(false);
+    }
+  };
+
   const handleCopy = (url, key) => {
     navigator.clipboard.writeText(url);
     setCopiedLink(key);
     setTimeout(() => setCopiedLink(''), 2000);
   };
 
+  // Helper to calculate status badge info
+  const getUserStatus = (user) => {
+    if (user.role === 'superadmin') {
+      return {
+        badgeClass: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700',
+        label: 'Lifetime Access',
+        detail: 'Exempt from subscription limits',
+        isSuper: true
+      };
+    }
+
+    if (user.isBlocked) {
+      return {
+        badgeClass: 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-850',
+        dotClass: 'bg-rose-500',
+        label: 'Blocked',
+        detail: 'Hidden from public & login blocked'
+      };
+    }
+
+    if (!user.subscriptionExpiresAt) {
+      return {
+        badgeClass: 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-850',
+        dotClass: 'bg-amber-500',
+        label: 'Inactive',
+        detail: 'No active subscription period set'
+      };
+    }
+
+    const expDate = new Date(user.subscriptionExpiresAt);
+    const now = new Date();
+    const diffMs = expDate - now;
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMs <= 0) {
+      return {
+        badgeClass: 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-850',
+        dotClass: 'bg-amber-500',
+        label: 'Expired',
+        detail: `Ended ${expDate.toLocaleDateString()}`
+      };
+    }
+
+    return {
+      badgeClass: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-850',
+      dotClass: 'bg-emerald-500',
+      label: 'Active',
+      detail: `Valid until ${expDate.toLocaleDateString()} (${diffDays}d left)`
+    };
+  };
+
+  // Calculate preview expiration date for the subscription modal
+  const calculatePreviewExpiry = () => {
+    if (!subscriptionTarget) return '';
+    const now = new Date();
+    let base = now;
+    if (extendCurrent && subscriptionTarget.subscriptionExpiresAt && new Date(subscriptionTarget.subscriptionExpiresAt) > now) {
+      base = new Date(subscriptionTarget.subscriptionExpiresAt);
+    }
+    const target = new Date(base);
+    target.setMonth(target.getMonth() + parseInt(subMonths || 1));
+    return target.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       
+      {/* Toast Alert */}
+      {actionSuccessMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-semibold animate-in slide-in-from-bottom-3 duration-200 border border-slate-700">
+          <span className="w-2 h-2 rounded-full bg-emerald-400" />
+          <span>{actionSuccessMessage}</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -139,7 +276,7 @@ export default function UsersList() {
             User Accounts & Portfolios
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Create credentials for people and manage their dynamic portfolio accounts
+            Manage user subscriptions, set access duration in months, and block or unblock public portfolio visibility
           </p>
         </div>
 
@@ -171,6 +308,7 @@ export default function UsersList() {
               <tr>
                 <th className="px-6 py-4">User</th>
                 <th className="px-6 py-4">Username & Public Link</th>
+                <th className="px-6 py-4">Subscription & Visibility</th>
                 <th className="px-6 py-4">Role</th>
                 <th className="px-6 py-4">Projects</th>
                 <th className="px-6 py-4 text-right">Actions</th>
@@ -179,8 +317,12 @@ export default function UsersList() {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800/60">
               {users.map((u) => {
                 const portfolioUrl = `${window.location.origin}/${u.username}`;
+                const status = getUserStatus(u);
+
                 return (
                   <tr key={u.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                    
+                    {/* 1. User Info */}
                     <td className="px-6 py-4">
                       <div className="font-bold text-gray-900 dark:text-white">
                         {u.profile?.name || u.email}
@@ -188,6 +330,7 @@ export default function UsersList() {
                       <div className="text-xs text-gray-500">{u.email}</div>
                     </td>
 
+                    {/* 2. Username & Link */}
                     <td className="px-6 py-4">
                       <div className="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">
                         @{u.username}
@@ -210,6 +353,20 @@ export default function UsersList() {
                       </div>
                     </td>
 
+                    {/* 3. Subscription & Visibility Status */}
+                    <td className="px-6 py-4">
+                      <div>
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${status.badgeClass}`}>
+                          {status.dotClass && <span className={`w-1.5 h-1.5 rounded-full ${status.dotClass}`} />}
+                          {status.label}
+                        </span>
+                        <div className="text-2xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
+                          {status.detail}
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* 4. Role */}
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                         u.role === 'superadmin'
@@ -220,11 +377,43 @@ export default function UsersList() {
                       </span>
                     </td>
 
+                    {/* 5. Projects */}
                     <td className="px-6 py-4 text-xs">
                       <span className="font-bold text-slate-900 dark:text-white">{u._count?.projects || 0}</span> projects
                     </td>
 
-                    <td className="px-6 py-4 text-right space-x-3">
+                    {/* 6. Actions */}
+                    <td className="px-6 py-4 text-right space-x-2.5">
+                      {u.role !== 'superadmin' && (
+                        <>
+                          {/* Manage Subscription Button */}
+                          <button
+                            onClick={() => {
+                              setSubscriptionTarget(u);
+                              setSubMonths(u.subscriptionDurationMonths || 1);
+                              setExtendCurrent(Boolean(u.subscriptionExpiresAt && new Date(u.subscriptionExpiresAt) > new Date()));
+                            }}
+                            className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/40 dark:hover:bg-sky-900/50 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-850 transition-colors cursor-pointer"
+                            title="Set duration and activate portfolio"
+                          >
+                            Subscription
+                          </button>
+
+                          {/* Block / Unblock Toggle */}
+                          <button
+                            onClick={() => setBlockTarget(u)}
+                            className={`text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors cursor-pointer border ${
+                              u.isBlocked
+                                ? 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-850'
+                                : 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-850'
+                            }`}
+                          >
+                            {u.isBlocked ? 'Unblock' : 'Block'}
+                          </button>
+                        </>
+                      )}
+
+                      {/* Reset Password */}
                       <button
                         onClick={() => {
                           setResetTarget(u);
@@ -235,10 +424,11 @@ export default function UsersList() {
                         Reset Password
                       </button>
 
+                      {/* Delete */}
                       {u.role !== 'superadmin' && (
                         <button
                           onClick={() => setDeleteTarget(u)}
-                          className="text-xs font-semibold text-red-500 hover:underline cursor-pointer"
+                          className="text-xs font-semibold text-rose-500 hover:text-rose-700 hover:underline cursor-pointer"
                         >
                           Delete
                         </button>
@@ -252,7 +442,218 @@ export default function UsersList() {
         </div>
       )}
 
-      {/* CREATE NEW USER MODAL */}
+      {/* ============================================================== */}
+      {/* 1. MANAGE SUBSCRIPTION MODAL */}
+      {/* ============================================================== */}
+      {subscriptionTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={(e) => { if (e.target === e.currentTarget && !submittingSub) setSubscriptionTarget(null); }}
+        >
+          <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150">
+            
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>📅</span> Manage Subscription Duration
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Set how many months portfolio remains active for <span className="font-mono text-sky-500 font-bold">@{subscriptionTarget.username}</span>
+                </p>
+              </div>
+              <button
+                onClick={() => setSubscriptionTarget(null)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateSubscription} className="p-6 space-y-5">
+              
+              {/* Current Status banner */}
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 text-xs flex items-center justify-between">
+                <div>
+                  <span className="text-slate-400">Current Status: </span>
+                  <span className={`font-bold ${subscriptionTarget.isBlocked ? 'text-rose-500' : 'text-slate-800 dark:text-slate-200'}`}>
+                    {subscriptionTarget.isBlocked ? 'Blocked' : (subscriptionTarget.subscriptionExpiresAt ? (new Date(subscriptionTarget.subscriptionExpiresAt) < new Date() ? 'Expired' : 'Active') : 'Inactive')}
+                  </span>
+                </div>
+                <div className="font-mono text-slate-500">
+                  {subscriptionTarget.subscriptionExpiresAt
+                    ? `Expires: ${new Date(subscriptionTarget.subscriptionExpiresAt).toLocaleDateString()}`
+                    : 'No Expiry Set'}
+                </div>
+              </div>
+
+              {/* Duration selector */}
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  Subscription Period (Months)
+                </label>
+                
+                {/* Preset Chips */}
+                <div className="grid grid-cols-4 gap-2">
+                  {[1, 3, 6, 12].map((m) => (
+                    <button
+                      type="button"
+                      key={m}
+                      onClick={() => setSubMonths(m)}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border ${
+                        subMonths === m
+                          ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent shadow-xs'
+                          : 'bg-slate-50 dark:bg-[#090D16] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-slate-400'
+                      }`}
+                    >
+                      {m} {m === 1 ? 'Month' : 'Months'}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom Month Input */}
+                <div className="flex items-center gap-3 pt-2">
+                  <span className="text-xs text-slate-500">Or custom months:</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="120"
+                    value={subMonths}
+                    onChange={(e) => setSubMonths(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-24 bg-slate-50 dark:bg-[#090D16] border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white font-mono outline-none focus:border-sky-500"
+                  />
+                  <span className="text-xs text-slate-500 font-mono">month(s)</span>
+                </div>
+              </div>
+
+              {/* Optional: Extend from existing expiry */}
+              {subscriptionTarget.subscriptionExpiresAt && new Date(subscriptionTarget.subscriptionExpiresAt) > new Date() && (
+                <label className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#090D16]/50 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={extendCurrent}
+                    onChange={(e) => setExtendCurrent(e.target.checked)}
+                    className="w-4 h-4 rounded text-sky-600 focus:ring-sky-500"
+                  />
+                  <span className="text-xs text-slate-700 dark:text-slate-300">
+                    Extend from current expiration date ({new Date(subscriptionTarget.subscriptionExpiresAt).toLocaleDateString()}) instead of today
+                  </span>
+                </label>
+              )}
+
+              {/* Expiry Date Calculation Preview */}
+              <div className="p-4 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-xs space-y-1">
+                <div className="font-bold text-sky-800 dark:text-sky-300 flex items-center gap-1.5">
+                  <span>✨</span> Resulting Visibility Period
+                </div>
+                <p className="text-slate-600 dark:text-slate-300">
+                  Portfolio will be publicly visible and active until: <strong className="text-slate-900 dark:text-white font-mono">{calculatePreviewExpiry()}</strong>
+                </p>
+                {subscriptionTarget.isBlocked && (
+                  <p className="text-2xs text-emerald-600 dark:text-emerald-400 font-medium">
+                    Note: Activating this subscription will automatically unblock this user.
+                  </p>
+                )}
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSubscriptionTarget(null)}
+                  className="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingSub}
+                  className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-semibold rounded-xl text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {submittingSub ? 'Saving...' : `Activate (${subMonths} ${subMonths === 1 ? 'Month' : 'Months'})`}
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* 2. BLOCK / UNBLOCK CONFIRMATION MODAL */}
+      {/* ============================================================== */}
+      {blockTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={() => { if (!blocking) setBlockTarget(null); }}
+        >
+          <div className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
+                blockTarget.isBlocked ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'
+              }`}>
+                {blockTarget.isBlocked ? (
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                )}
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  {blockTarget.isBlocked ? `Unblock User @${blockTarget.username}` : `Block User @${blockTarget.username}`}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  {blockTarget.isBlocked ? 'Restore public visibility' : 'Hide portfolio and suspend login'}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              {blockTarget.isBlocked ? (
+                <>
+                  Are you sure you want to <strong>unblock @{blockTarget.username}</strong>? Their portfolio will become publicly accessible again (subject to their active subscription).
+                </>
+              ) : (
+                <>
+                  Are you sure you want to <strong>block @{blockTarget.username}</strong>?
+                  Their public URL (<span className="font-mono text-xs">{window.location.origin}/{blockTarget.username}</span>) will immediately be hidden from all public visitors. 
+                  Only you (as superadmin) will be able to view it.
+                </>
+              )}
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                disabled={blocking}
+                onClick={() => setBlockTarget(null)}
+                className="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={blocking}
+                onClick={handleToggleBlock}
+                className={`px-5 py-2 text-white font-semibold rounded-xl text-xs shadow-xs transition-colors cursor-pointer ${
+                  blockTarget.isBlocked
+                    ? 'bg-emerald-600 hover:bg-emerald-700'
+                    : 'bg-rose-600 hover:bg-rose-700'
+                }`}
+              >
+                {blocking ? 'Processing...' : (blockTarget.isBlocked ? 'Confirm Unblock' : 'Confirm Block User')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* 3. CREATE NEW USER MODAL (With Subscription Duration) */}
+      {/* ============================================================== */}
       {modalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
@@ -289,7 +690,7 @@ export default function UsersList() {
                     <span>✓</span> Account Created Successfully!
                   </div>
                   <p className="text-xs text-gray-600 dark:text-gray-300">
-                    Share these credentials with the user so they can log in and customize their portfolio:
+                    The portfolio has been activated for <strong className="font-bold">{successInfo.durationMonths} month(s)</strong>. Share credentials with user:
                   </p>
                 </div>
 
@@ -307,6 +708,10 @@ export default function UsersList() {
                   <div>
                     <span className="text-slate-400">Password: </span>
                     <span className="text-slate-900 dark:text-white font-bold">{successInfo.password}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Subscription: </span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">{successInfo.durationMonths} Month(s) Active</span>
                   </div>
                 </div>
 
@@ -389,6 +794,32 @@ export default function UsersList() {
                   />
                 </div>
 
+                {/* Subscription Duration in Months */}
+                <div className="space-y-1.5 pt-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Subscription Duration (Months)
+                  </label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[1, 3, 6, 12].map((m) => (
+                      <button
+                        type="button"
+                        key={m}
+                        onClick={() => setForm(p => ({ ...p, subscriptionDurationMonths: m }))}
+                        className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all border ${
+                          form.subscriptionDurationMonths === m
+                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent shadow-xs'
+                            : 'bg-slate-50 dark:bg-[#090D16] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
+                        }`}
+                      >
+                        {m} {m === 1 ? 'Month' : 'Mos'}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-2xs text-slate-400">
+                    Portfolio will be shown publicly for this duration starting immediately after creation.
+                  </p>
+                </div>
+
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
                   <button
                     type="button"
@@ -412,7 +843,9 @@ export default function UsersList() {
         </div>
       )}
 
-      {/* RESET PASSWORD MODAL */}
+      {/* ============================================================== */}
+      {/* 4. RESET PASSWORD MODAL */}
+      {/* ============================================================== */}
       {resetTarget && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
@@ -456,7 +889,9 @@ export default function UsersList() {
         </div>
       )}
 
-      {/* DELETE CONFIRMATION MODAL */}
+      {/* ============================================================== */}
+      {/* 5. DELETE CONFIRMATION MODAL */}
+      {/* ============================================================== */}
       {deleteTarget && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"

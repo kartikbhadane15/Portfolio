@@ -13,6 +13,8 @@ import CredentialsSection from './sections/CredentialsSection';
 import Contact from './sections/Contact';
 import RecruiterModal from './RecruiterModal';
 
+import PortfolioInactive from './PortfolioInactive';
+
 export default function DynamicPortfolio({ defaultUsername = null }) {
   const { username: routeUsername } = useParams();
   const username = routeUsername || defaultUsername;
@@ -20,6 +22,7 @@ export default function DynamicPortfolio({ defaultUsername = null }) {
   const [portfolioData, setPortfolioData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [inactiveInfo, setInactiveInfo] = useState(null);
   const [isRecruiterModalOpen, setIsRecruiterModalOpen] = useState(false);
 
   useEffect(() => {
@@ -31,6 +34,7 @@ export default function DynamicPortfolio({ defaultUsername = null }) {
 
     setLoading(true);
     setNotFound(false);
+    setInactiveInfo(null);
 
     fetchPublicPortfolio(username)
       .then((data) => {
@@ -63,7 +67,11 @@ export default function DynamicPortfolio({ defaultUsername = null }) {
       })
       .catch((err) => {
         console.error('Failed to load portfolio:', err);
-        setNotFound(true);
+        if (err.response?.status === 403 || err.response?.data?.isInactive) {
+          setInactiveInfo(err.response?.data || { isBlocked: true, message: 'Portfolio is unavailable' });
+        } else {
+          setNotFound(true);
+        }
       })
       .finally(() => {
         setLoading(false);
@@ -76,6 +84,18 @@ export default function DynamicPortfolio({ defaultUsername = null }) {
         <div className="w-10 h-10 border-2 border-cyan-accent border-t-transparent rounded-full animate-spin mb-4" />
         <p className="text-sm font-mono text-gray-500">Loading portfolio for @{username}...</p>
       </div>
+    );
+  }
+
+  // If user is blocked or expired (and viewer is not superadmin)
+  if (inactiveInfo) {
+    return (
+      <PortfolioInactive
+        username={username}
+        isBlocked={inactiveInfo.isBlocked}
+        isExpired={inactiveInfo.isExpired}
+        message={inactiveInfo.message}
+      />
     );
   }
 
@@ -99,7 +119,7 @@ export default function DynamicPortfolio({ defaultUsername = null }) {
     );
   }
 
-  const { profile, projects, experience, skills, education, certifications, achievements, settings } = portfolioData;
+  const { profile, projects, experience, skills, education, certifications, achievements, settings, adminPreview } = portfolioData;
 
   const showExp = settings?.showExperience !== false;
   const showProj = settings?.showProjects !== false;
@@ -110,6 +130,32 @@ export default function DynamicPortfolio({ defaultUsername = null }) {
   return (
     <div className="min-h-screen flex flex-col bg-light-bg dark:bg-dark-bg text-gray-900 dark:text-white">
       
+      {/* SUPERADMIN PREVIEW BANNER */}
+      {adminPreview && (
+        <div className="bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border-b border-amber-500/30 text-amber-900 dark:text-amber-200 px-4 py-2.5 text-xs sticky top-0 z-[60] backdrop-blur-md shadow-xs">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-center sm:text-left">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full font-bold bg-amber-500 text-white text-2xs uppercase tracking-wider font-mono">
+                👑 Superadmin Preview Mode
+              </span>
+              <span>
+                This portfolio is currently{' '}
+                <strong className="underline underline-offset-2">
+                  {adminPreview.isBlocked ? 'Blocked by Superadmin' : 'Subscription Expired'}
+                </strong>{' '}
+                and completely hidden from the public. Only you can view this.
+              </span>
+            </div>
+            <Link
+              to="/admin/users"
+              className="inline-flex items-center gap-1 font-bold text-amber-800 dark:text-amber-300 hover:underline shrink-0"
+            >
+              <span>Manage User & Subscription</span> &rarr;
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* NAVBAR */}
       <Navbar
         profileName={profile?.name}

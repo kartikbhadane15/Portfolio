@@ -47,6 +47,11 @@ router.get('/users', requireSuperAdmin, async (req, res) => {
         email: true,
         username: true,
         role: true,
+        isBlocked: true,
+        subscriptionStatus: true,
+        subscriptionDurationMonths: true,
+        subscriptionStartedAt: true,
+        subscriptionExpiresAt: true,
         createdAt: true,
         profile: {
           select: {
@@ -72,7 +77,7 @@ router.get('/users', requireSuperAdmin, async (req, res) => {
 
 router.post('/users', requireSuperAdmin, async (req, res) => {
   try {
-    const { name, username, email, password } = req.body;
+    const { name, username, email, password, subscriptionDurationMonths } = req.body;
 
     if (!name || !username || !email || !password) {
       return res.status(400).json({ error: 'Name, username, email, and password are required' });
@@ -104,6 +109,11 @@ router.post('/users', requireSuperAdmin, async (req, res) => {
       return res.status(400).json({ error: 'A user with this email already exists.' });
     }
 
+    const duration = Math.max(1, parseInt(subscriptionDurationMonths) || 1);
+    const now = new Date();
+    const expiresAt = new Date(now);
+    expiresAt.setMonth(expiresAt.getMonth() + duration);
+
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
@@ -114,6 +124,11 @@ router.post('/users', requireSuperAdmin, async (req, res) => {
         username: cleanUsername,
         passwordHash,
         role: 'user',
+        isBlocked: false,
+        subscriptionStatus: 'active',
+        subscriptionDurationMonths: duration,
+        subscriptionStartedAt: now,
+        subscriptionExpiresAt: expiresAt,
         profile: {
           create: {
             name: name.trim(),
@@ -137,6 +152,11 @@ router.post('/users', requireSuperAdmin, async (req, res) => {
         email: true,
         username: true,
         role: true,
+        isBlocked: true,
+        subscriptionStatus: true,
+        subscriptionDurationMonths: true,
+        subscriptionStartedAt: true,
+        subscriptionExpiresAt: true,
         createdAt: true
       }
     });
@@ -144,11 +164,121 @@ router.post('/users', requireSuperAdmin, async (req, res) => {
     res.status(201).json({
       success: true,
       user: newUser,
-      message: `User '${cleanUsername}' created successfully! Portfolio available at /${cleanUsername}`
+      message: `User '${cleanUsername}' created with ${duration} month(s) subscription! Portfolio available at /${cleanUsername}`
     });
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ error: 'Failed to create user account' });
+  }
+});
+
+// Block or Unblock user
+router.patch('/users/:id/block', requireSuperAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isBlocked } = req.body;
+
+    if (id === req.user.id) {
+      return res.status(400).json({ error: 'You cannot block your own superadmin account' });
+    }
+
+    const targetUser = await prisma.user.findUnique({ where: { id } });
+    if (!targetUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (targetUser.role === 'superadmin') {
+      return res.status(400).json({ error: 'Superadmin accounts cannot be blocked' });
+    }
+
+    const blocked = Boolean(isBlocked);
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: {
+        isBlocked: blocked,
+        subscriptionStatus: blocked ? 'blocked' : (
+          targetUser.subscriptionExpiresAt && new Date() > new Date(targetUser.subscriptionExpiresAt)
+            ? 'expired'
+            : 'active'
+        )
+      },
+      select: {
+        id: true,
+        username: true,
+        isBlocked: true,
+        subscriptionStatus: true,
+        subscriptionExpiresAt: true
+      }
+    });
+
+    res.json({
+      success: true,
+      message: updatedUser.isBlocked
+        ? `User @${updatedUser.username} has been blocked and their public portfolio is hidden.`
+        : `User @${updatedUser.username} has been unblocked.`,
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Error toggling user block status:', error);
+    res.status(500).json({ error: 'Failed to update user block status' });
+  }
+});
+
+// Set / Activate Subscription duration in months
+router.patch('/users/:id/subscription', requireSuperAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { durationMonths, extendCurrent } = req.body;
+
+    const months = Math.max(1, parseInt(durationMonths) || 1);
+
+    const targetUser = await prisma.user.findUnique({ where: { id } });
+    if (!targetUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (targetUser.role === 'superadmin') {
+      return res.status(400).json({ error: 'Superadmin accounts have unlimited lifetime access' });
+    }
+
+    const now = new Date();
+    let baseDate = now;
+    // If extendCurrent is requested and current expiresAt is in the future, extend from that date
+    if (extendCurrent && targetUser.subscriptionExpiresAt && new Date(targetUser.subscriptionExpiresAt) > now) {
+      baseDate = new Date(targetUser.subscriptionExpiresAt);
+    }
+
+    const newExpiresAt = new Date(baseDate);
+    newExpiresAt.setMonth(newExpiresAt.getMonth() + months);
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: {
+        subscriptionDurationMonths: months,
+        subscriptionStartedAt: now,
+        subscriptionExpiresAt: newExpiresAt,
+        subscriptionStatus: 'active',
+        isBlocked: false // Activating subscription unblocks the user automatically
+      },
+      select: {
+        id: true,
+        username: true,
+        isBlocked: true,
+        subscriptionStatus: true,
+        subscriptionDurationMonths: true,
+        subscriptionStartedAt: true,
+        subscriptionExpiresAt: true
+      }
+    });
+
+    res.json({
+      success: true,
+      message: `Subscription for @${updatedUser.username} activated for ${months} month(s), valid until ${newExpiresAt.toLocaleDateString()}.`,
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Error updating user subscription:', error);
+    res.status(500).json({ error: 'Failed to update user subscription' });
   }
 });
 
@@ -228,7 +358,8 @@ router.get('/projects', async (req, res) => {
   try {
     const projects = await prisma.project.findMany({
       where: { userId: req.user.id },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      include: { caseStudy: true }
     });
     const mappedProjects = projects.map(p => ({
       ...p,
@@ -242,7 +373,7 @@ router.get('/projects', async (req, res) => {
 
 router.post('/projects', async (req, res) => {
   try {
-    const { description, demoUrl, caseStudy, tags, websiteUrl, screenshots, startDate, endDate, ...rest } = req.body;
+    const { description, demoUrl, caseStudy, tags, websiteUrl, screenshots, startDate, endDate, showCaseStudy, ...rest } = req.body;
     const project = await prisma.project.create({ 
       data: {
         ...rest,
@@ -256,6 +387,7 @@ router.post('/projects', async (req, res) => {
         slug: slugify(rest.title || 'untitled'),
         shortDescription: description || '',
         isPublished: true,
+        showCaseStudy: typeof showCaseStudy === 'boolean' ? showCaseStudy : true,
         ...(caseStudy && {
           caseStudy: {
             create: caseStudy
@@ -272,7 +404,7 @@ router.post('/projects', async (req, res) => {
 
 router.put('/projects/:id', async (req, res) => {
   try {
-    const { description, demoUrl, caseStudy, tags, websiteUrl, screenshots, startDate, endDate, ...rest } = req.body;
+    const { description, demoUrl, caseStudy, tags, websiteUrl, screenshots, startDate, endDate, showCaseStudy, ...rest } = req.body;
     
     // Verify ownership
     const existing = await prisma.project.findFirst({
@@ -294,6 +426,10 @@ router.put('/projects/:id', async (req, res) => {
       data.slug = slugify(rest.title);
     }
     
+    if (typeof showCaseStudy === 'boolean') {
+      data.showCaseStudy = showCaseStudy;
+    }
+
     if (caseStudy) {
       data.caseStudy = {
         upsert: {
@@ -307,12 +443,6 @@ router.put('/projects/:id', async (req, res) => {
       where: { id: req.params.id },
       data
     });
-
-    if (!caseStudy) {
-      await prisma.caseStudy.deleteMany({
-        where: { projectId: req.params.id }
-      });
-    }
 
     res.json(project);
   } catch (error) {

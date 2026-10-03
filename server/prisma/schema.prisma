@@ -11,9 +11,14 @@ model User {
   email        String   @unique
   username     String   @unique
   passwordHash String
-  role         String   @default("user")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role                       String    @default("user")
+  isBlocked                  Boolean   @default(false)
+  subscriptionStatus         String    @default("active")
+  subscriptionDurationMonths Int?      @default(1)
+  subscriptionStartedAt      DateTime? @default(now())
+  subscriptionExpiresAt      DateTime?
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
 
   profile         Profile?
   settings        SiteSettings?
@@ -58,6 +63,7 @@ model Project {
   isFeatured       Boolean    @default(false)
   featuredOrder    Int        @default(0)
   isPublished      Boolean    @default(false)
+  showCaseStudy    Boolean    @default(true)
   tags             String[]
   screenshots      String[]
   websiteUrl       String?

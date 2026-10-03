@@ -36,6 +36,13 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    // Check if non-superadmin user is blocked
+    if (user.role !== 'superadmin' && user.isBlocked) {
+      return res.status(403).json({
+        error: 'Your account has been suspended by the administrator. Please contact support.'
+      });
+    }
+
     // Generate JWT token
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, username: user.username },
